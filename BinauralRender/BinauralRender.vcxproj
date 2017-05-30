@@ -69,13 +69,35 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\inc;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\inc;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\inc;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <LibraryPath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\inc;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>fmod_vc.lib;fmod64_vc.lib;fmodL_vc.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -83,6 +105,9 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>fmod_vc.lib;fmod64_vc.lib;fmodL_vc.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -95,6 +120,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>fmod_vc.lib;fmod64_vc.lib;fmodL_vc.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -108,9 +134,14 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>fmod_vc.lib;fmod64_vc.lib;fmodL_vc.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AudioIO.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
