@@ -71,23 +71,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>.\FMOD\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\FMOD\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>.\FMOD\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\FMOD\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>.\FMOD\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\FMOD\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\huzhangyang\Documents\Visual Studio 2017\Projects\BinauralRender\BinauralRender\FMOD\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>.\FMOD\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\FMOD\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -141,6 +141,7 @@
     <ClInclude Include="AudioIO.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AudioIO.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
