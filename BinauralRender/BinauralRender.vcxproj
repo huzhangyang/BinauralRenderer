@@ -71,23 +71,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>.\FMOD\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>.\FMOD\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>.\FMOD\lib;.\MATLAB\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\FMOD\inc;.\MATLAB\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>.\FMOD\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>.\FMOD\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>.\FMOD\lib;.\MATLAB\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\FMOD\inc;.\MATLAB\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>.\FMOD\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>.\FMOD\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>.\FMOD\lib;.\MATLAB\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\FMOD\inc;.\MATLAB\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <LibraryPath>.\FMOD\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>.\FMOD\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>.\FMOD\lib;.\MATLAB\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>.\FMOD\inc;.\MATLAB\inc;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -96,7 +96,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>fmod_vc.lib;fmod64_vc.lib;fmodL_vc.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fmod64_vc.lib;fmodL64_vc.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -106,7 +106,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>fmod_vc.lib;fmod64_vc.lib;fmodL_vc.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fmod64_vc.lib;fmodL64_vc.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -120,7 +120,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>fmod_vc.lib;fmod64_vc.lib;fmodL_vc.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fmod64_vc.lib;fmodL64_vc.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -134,14 +134,16 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>fmod_vc.lib;fmod64_vc.lib;fmodL_vc.lib;fmodL64_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fmod64_vc.lib;fmodL64_vc.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AudioIO.h" />
+    <ClInclude Include="DataIO.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AudioIO.cpp" />
+    <ClCompile Include="DataIO.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
