@@ -1,5 +1,11 @@
 #pragma once
 
+/*******************************************************************
+* Author: Zhangyang Hu
+* Date: 2017-05-31
+* Description: Audio input / output class. Basically a wrapper of FMOD.
+*******************************************************************/
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -11,9 +17,19 @@ using namespace FMOD;
 class AudioIO
 {
 public:
+	/* Life Cyle.
+	Call init to initialize the class.
+	Call update every frame in game engine.
+	Call release upon quit.
+	*/
 	void Init();
 	void Update();
 	void Release();
+
+	/*
+	Basic Playback funtions. Pretty much self-explainatory.
+	The length and position unit is millisecond.
+	*/
 	void Open(const char* filename);
 	void Play();
 	void TogglePause();

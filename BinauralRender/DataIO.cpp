@@ -56,7 +56,7 @@ HRIRData* DataIO::OpenMat(const char* filename)
 	if (matArray != NULL)
 	{
 		auto matData = (double*)mxGetData(matArray);
-		const mwSize *dimension = mxGetDimensions(matArray);
+		const mwSize *dimension = mxGetDimensions(matArray);//25*50*200
 		for (int i = 0; i < dimension[0]; i++)
 			for (int j = 0; j < dimension[1]; j++)
 				for (int k = 0; k < dimension[2]; k++)
@@ -66,7 +66,7 @@ HRIRData* DataIO::OpenMat(const char* filename)
 	if (matArray != NULL)
 	{
 		auto matData = (double*)mxGetData(matArray);
-		const mwSize *dimension = mxGetDimensions(matArray);
+		const mwSize *dimension = mxGetDimensions(matArray);//25*50*200
 		for (int i = 0; i < dimension[0]; i++)
 			for (int j = 0; j < dimension[1]; j++)
 				for (int k = 0; k < dimension[2]; k++)
@@ -80,7 +80,7 @@ HRIRData* DataIO::OpenMat(const char* filename)
 }
 
 HRIRData::HRIRData()
-{
+{// assemble azimuth and elevation values according to CIPIC document.
 	azimuths[0] = -80;
 	azimuths[1] = -65;
 	azimuths[2] = -55;
