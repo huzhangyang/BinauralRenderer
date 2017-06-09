@@ -8,10 +8,13 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cassert>
+#include <vector>
 
 #include <fmod.hpp>
 #include <fmod_errors.h>
 
+using namespace std;
 using namespace FMOD;
 
 class AudioIO
@@ -28,9 +31,10 @@ public:
 
 	/*
 	Basic Playback funtions. Pretty much self-explainatory.
+	OpenOnly: Don't buffer the audio so that readData is to be used.
 	The length and position unit is millisecond.
 	*/
-	void Open(const char* filename);
+	void Open(const char* filename, bool openOnly = false);
 	void Play();
 	void TogglePause();
 	bool IsPlaying();
@@ -38,6 +42,12 @@ public:
 	unsigned int GetLength();
 	unsigned int GetPosition();
 	void SetPosition(unsigned int position);
+
+	/*
+	PCM related.
+	*/
+	void InitPCM();
+	void PlayPCM();
 private:
 	System *system;
 	Channel* channel;
@@ -45,4 +55,12 @@ private:
 	FMOD_RESULT result;
 	void ErrorHandle();
 
+	/*
+	PCM related.
+	*/
+	Channel* channelPCM;
+	Sound* soundPCM;
+
+	vector<double> ReadData(unsigned int length);
+	static FMOD_RESULT F_CALLBACK PCMReadCallback(FMOD_SOUND* _sound, void *data, unsigned int datalen);
 };
