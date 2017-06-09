@@ -98,7 +98,7 @@ void AudioIO::InitPCM()
 	exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
 	exinfo.numchannels = numchannels;
 	exinfo.defaultfrequency = (int)frequency;
-	exinfo.decodebuffersize = (int)frequency;//TODO optimize buffer size
+	exinfo.decodebuffersize = DECODE_BUFFER_SIZE;
 	exinfo.length = exinfo.defaultfrequency * exinfo.numchannels * sizeof(short) * pcmLength / 1000;
 	exinfo.format = format;
 	exinfo.pcmreadcallback = this->PCMReadCallback;
@@ -108,16 +108,18 @@ void AudioIO::InitPCM()
 
 	result = soundPCM->setUserData(this);//pass the class to userData so as to get from callback
 	ErrorHandle();
-
-	result = system->playSound(soundPCM, 0, false, &channelPCM);
-	ErrorHandle();
 }
 
 void AudioIO::PlayPCM()
 {
-	while (true)
+	result = system->playSound(soundPCM, 0, false, &channelPCM);
+	ErrorHandle();
+
+	bool playing = true;
+	while (playing)
 	{
 		Update();
+		channelPCM->isPlaying(&playing);
 	}
 }
 
@@ -134,6 +136,11 @@ void AudioIO::ReadData(unsigned int size)
 	short* dataBlock = (short*)malloc(size);//pcm 16bits data 
 	unsigned int actualReadSize;
 	result = sound->readData(&dataBlock[0], size, &actualReadSize);
+	if (result != FMOD_OK)
+	{
+		channelPCM->stop();
+		return;
+	}
 	ErrorHandle();
 
 	//ConvertToDoubleVector
@@ -166,7 +173,7 @@ FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, 
 	short* pcm = (short*)data;
 	for (unsigned int i = 0; i < context->leftChannelData.size() + context->rightChannelData.size(); i++)
 	{
-		double value = i % 2 == 0 ? (short)(context->leftChannelData[i / 2] * 32768) : (short)(context->rightChannelData[i / 2] * 32768);
+		short value = i % 2 == 0 ? (short)(context->leftChannelData[i / 2] * 32768) : (short)(context->rightChannelData[i / 2] * 32768);
 		if (value > 32767) value = 32767;
 		if (value < -32768) value = -32768;
 		pcm[i] = value;
