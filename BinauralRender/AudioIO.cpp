@@ -28,6 +28,14 @@ void AudioIO::Open(const char * filename, bool openOnly)
 	else
 		result = system->createSound(filename, FMOD_INIT_NORMAL, 0, &sound);
 	ErrorHandle();
+
+	int numchannels;
+	result = sound->getFormat(0, 0, &numchannels, 0);
+	if (numchannels != 2)
+	{
+		printf("Sorry, only 2-channel stereo audio is supported for now !\n");
+		sound->release();
+	}
 }
 
 void AudioIO::Play()
@@ -90,7 +98,7 @@ void AudioIO::InitPCM()
 	exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
 	exinfo.numchannels = numchannels;
 	exinfo.defaultfrequency = (int)frequency;
-	exinfo.decodebuffersize = (int)frequency;
+	exinfo.decodebuffersize = (int)frequency;//TODO optimize buffer size
 	exinfo.length = exinfo.defaultfrequency * exinfo.numchannels * sizeof(short) * pcmLength / 1000;
 	exinfo.format = format;
 	exinfo.pcmreadcallback = this->PCMReadCallback;
@@ -121,7 +129,7 @@ void AudioIO::ErrorHandle()
 	}
 }
 
-vector<double> AudioIO::ReadData(unsigned int size)
+void AudioIO::ReadData(unsigned int size)
 {
 	short* dataBlock = (short*)malloc(size);//pcm 16bits data 
 	unsigned int actualReadSize;
@@ -129,41 +137,39 @@ vector<double> AudioIO::ReadData(unsigned int size)
 	ErrorHandle();
 
 	//ConvertToDoubleVector
-	vector<double> ret;
+	leftChannelData.clear();
+	rightChannelData.clear();
 	for (unsigned int i = 0; i < actualReadSize / sizeof(short); i++)
 	{
 		double value = (double)dataBlock[i] / 32768.0;
 		if (value > 1) value = 1.0;
 		if (value < -1) value = -1.0;
-		ret.push_back(value);
+		i % 2 == 0 ? leftChannelData.push_back(value) : rightChannelData.push_back(value);
 	}
-	return ret;
+
+	free(dataBlock);
 }
 
 FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, unsigned int datalen)
 {
 	void *userData;
+	AudioIO* context;
 	FMOD_RESULT result = ((Sound*)_sound)->getUserData(&userData);
-
-	if (result != FMOD_OK || userData == NULL)
+	context = (AudioIO*) userData;
+	if (result != FMOD_OK || context == NULL)
 	{
 		return FMOD_ERR_INVALID_PARAM;
 	}
-	vector<double> blockData = ((AudioIO*)userData)->ReadData(datalen);
+	context->ReadData(datalen);
 
+	//ConvertToPCM
 	short* pcm = (short*)data;
-	for (unsigned int i = 0; i < datalen / sizeof(short); i++)
+	for (unsigned int i = 0; i < context->leftChannelData.size() + context->rightChannelData.size(); i++)
 	{
-		double value = blockData[i] * 32768;
+		double value = i % 2 == 0 ? (short)(context->leftChannelData[i / 2] * 32768) : (short)(context->rightChannelData[i / 2] * 32768);
 		if (value > 32767) value = 32767;
 		if (value < -32768) value = -32768;
-		pcm[i] = (short)value;
-	}
-
-	for (unsigned int count = 0; count < (datalen >> 2); count++)     // >>2 = 16bit stereo (4 bytes per sample)
-	{
-		//*stereo16bitbuffer++ = (signed short)(Common_Sin(t1) * 32767.0f);    // left channel
-		//*stereo16bitbuffer++ = (signed short)(Common_Sin(t2) * 32767.0f);    // right channel
+		pcm[i] = value;
 	}
 
 	return FMOD_OK;

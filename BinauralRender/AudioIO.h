@@ -60,7 +60,9 @@ private:
 	*/
 	Channel* channelPCM;
 	Sound* soundPCM;
+	vector<double> leftChannelData;
+	vector<double> rightChannelData;
 
-	vector<double> ReadData(unsigned int length);
+	void ReadData(unsigned int length);
 	static FMOD_RESULT F_CALLBACK PCMReadCallback(FMOD_SOUND* _sound, void *data, unsigned int datalen);
 };
