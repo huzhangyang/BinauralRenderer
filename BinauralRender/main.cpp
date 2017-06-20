@@ -12,9 +12,10 @@ int main()
 	//audio->PlayPCM();
 
 	DataIO *data = new DataIO();
-	auto mat = data->OpenMat("c://test.mat");
+	HRIRData *hrir = data->OpenMat("c://test.mat");
+	HRTFData *hrtf = data->ConvertToHRTF(hrir);
 
-	Renderer *renderer = new Renderer();
+	//Renderer *renderer = new Renderer();
 	//renderer->Render(vector<double>(), vector<double>());
 
 	return 0;

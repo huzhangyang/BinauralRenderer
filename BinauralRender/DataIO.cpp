@@ -79,7 +79,47 @@ HRIRData* DataIO::OpenMat(const char* filename)
 	return data;
 }
 
-HRIRData::HRIRData()
+HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
+{
+	HRTFData* data = new HRTFData();
+	//pre-measure
+	double* in = (double*)malloc(sizeof(double) * HRIR_LENGTH);
+	fftw_complex* out = (fftw_complex *)fftw_malloc(sizeof(double) * HRIR_LENGTH * 2);
+	fftw_plan plan = fftw_plan_dft_r2c_1d(HRIR_LENGTH, in, out, FFTW_MEASURE);
+	fftw_execute(plan);
+
+	//fft to hrtf
+	for (int i = 0; i < AZIMUTH_COUNT; i++)
+	{
+		for (int j = 0; j < ELEVATION_COUNT; j++)
+		{
+			for (int k = 0; k < HRIR_LENGTH; k++)
+			{
+				in[k] = hrir->hrir_l[i][j][k];
+			}
+			fftw_execute(plan);
+			for (int k = 0; k < HRIR_LENGTH; k++)
+			{
+				data->hrtf_l[i][j].push_back(out[k][0]);
+			}
+			for (int k = 0; k < HRIR_LENGTH; k++)
+			{
+				in[k] = hrir->hrir_r[i][j][k];
+			}
+			fftw_execute(plan);
+			for (int k = 0; k < HRIR_LENGTH; k++)
+			{
+				data->hrtf_r[i][j].push_back(out[k][0]);
+			}
+		}
+	}
+
+	fftw_destroy_plan(plan);
+	free(in);
+	fftw_free(out);
+}
+
+HRTFData::HRTFData()
 {// assemble azimuth and elevation values according to CIPIC document.
 	azimuths[0] = -80;
 	azimuths[1] = -65;
@@ -94,37 +134,37 @@ HRIRData::HRIRData()
 		elevations[i] = -45 + 5.625f * i;
 }
 
-double* HRIRData::GetLeftHRIR(float azimuth, float elevation, bool nearest)
+vector<double> HRTFData::GetLeftHRTF(float azimuth, float elevation, bool nearest)
 {
 	int azimuthIndex = GetAzimuthIndex(azimuth, nearest);
 	int elevationIndex = GetElevationIndex(elevation, nearest);
 	if (azimuthIndex >= 0 && elevationIndex >= 0)
 	{
-		return hrir_l[azimuthIndex][elevationIndex];
+		return hrtf_l[azimuthIndex][elevationIndex];
 	}
 	else
 	{
 		printf("GetLeftHRIR Failed at %f %f.\n", azimuth, elevation);
-		return NULL;
+		return vector<double>();
 	}
 }
 
-double* HRIRData::GetRightHRIR(float azimuth, float elevation, bool nearest)
+vector<double> HRTFData::GetRightHRTF(float azimuth, float elevation, bool nearest)
 {
 	int azimuthIndex = GetAzimuthIndex(azimuth, nearest);
 	int elevationIndex = GetElevationIndex(elevation, nearest);
 	if (azimuthIndex >= 0 && elevationIndex >= 0)
 	{
-		return hrir_r[azimuthIndex][elevationIndex];
+		return hrtf_r[azimuthIndex][elevationIndex];
 	}
 	else
 	{
 		printf("GetRightHRIR Failed at %f %f.\n", azimuth, elevation);
-		return NULL;
+		return vector<double>();
 	}
 }
 
-int HRIRData::GetAzimuthIndex(float azimuth, bool nearest)
+int HRTFData::GetAzimuthIndex(float azimuth, bool nearest)
 {
 	assert(azimuth >= -90 && azimuth <= 90);
 
@@ -147,7 +187,7 @@ int HRIRData::GetAzimuthIndex(float azimuth, bool nearest)
 	return azimuthIndex;
 }
 
-int HRIRData::GetElevationIndex(float elevation, bool nearest)
+int HRTFData::GetElevationIndex(float elevation, bool nearest)
 {
 	assert(elevation >= -90 && elevation <= 270);
 

@@ -7,35 +7,49 @@
 *******************************************************************/
 
 #include<cmath>
+#include<vector>
 #include "mat.h"
+#include "fftw3.h"
+
+const int AZIMUTH_COUNT = 25;
+const int ELEVATION_COUNT = 50;
+const int HRIR_LENGTH = 200;
+
+using namespace std;
 
 class HRIRData
 {
 public:
 	/* Raw MATLAB data.*/
 	char* name;
-	double OnL[25][50];
-	double OnR[25][50];
-	double ITD[25][50];
-	double hrir_l[25][50][200];
-	double hrir_r[25][50][200];
+	double OnL[AZIMUTH_COUNT][ELEVATION_COUNT];
+	double OnR[AZIMUTH_COUNT][ELEVATION_COUNT];
+	double ITD[AZIMUTH_COUNT][ELEVATION_COUNT];
+	double hrir_l[AZIMUTH_COUNT][ELEVATION_COUNT][HRIR_LENGTH];
+	double hrir_r[AZIMUTH_COUNT][ELEVATION_COUNT][HRIR_LENGTH];
+};
 
-	HRIRData();
+class HRTFData
+{
+public:
+	vector<double> hrtf_l[AZIMUTH_COUNT][ELEVATION_COUNT];
+	vector<double> hrtf_r[AZIMUTH_COUNT][ELEVATION_COUNT];
 
-	/* Get HRIR data.
+	HRTFData();
+
+	/* Get HRTF data.
 	@param azimuth: azimuth angle in degree. [-90, 90]
 	@param elevation: elevation angle in degree. [-90, 270]
-	@param nearest: if no specific hrir data found given azimuth and elevation, use hrir of nearest location.
-	@return HRIR data of length 200.
+	@param nearest: if no specific hrtf data found given azimuth and elevation, use hrtf of nearest location.
+	@return HRTF data of length 200.
 	*/
-	double* GetLeftHRIR(float azimuth, float elevation, bool nearest = true);
-	double* GetRightHRIR(float azimuth, float elevation, bool nearest = true);
-
+	vector<double> GetLeftHRTF(float azimuth, float elevation, bool nearest = true);
+	vector<double> GetRightHRTF(float azimuth, float elevation, bool nearest = true);
 private:
-	float azimuths[25];
-	float elevations[50];
+	float azimuths[AZIMUTH_COUNT];
+	float elevations[ELEVATION_COUNT];
 
-	/* Get corresponding index to be used in hrir_l and hrir_r.
+	/* Get corresponding index to be used in hrtf_l and hrtf_r.
 	@param azimuth: azimuth angle in degree. [-90, 90]
 	@param elevation: elevation angle in degree. [-90, 270]
 	@param nearest: if no specific index found given azimuth or elevation, use index of nearest location.
@@ -43,6 +57,7 @@ private:
 	*/
 	int GetAzimuthIndex(float azimuth, bool nearest);
 	int GetElevationIndex(float elevation, bool nearest);
+
 };
 
 class DataIO
@@ -53,7 +68,13 @@ public:
 	@param filename: the path of .mat file.
 	@return extracted HRIR data. NULL if failed.
 	*/
-	HRIRData* OpenMat(const char* filename);
+	static HRIRData* OpenMat(const char* filename);
+
+	/* Convert HRIRs to HRTFs using fourier transform.
+	@param hrir: the path of .mat file.
+	@return converted HRTF data. NULL if failed.
+	*/
+	static HRTFData* ConvertToHRTF(HRIRData* hrir);
 
 private:
 };
