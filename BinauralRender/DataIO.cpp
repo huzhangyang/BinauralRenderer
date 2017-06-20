@@ -117,6 +117,8 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 	fftw_destroy_plan(plan);
 	free(in);
 	fftw_free(out);
+
+	return data;
 }
 
 HRTFData::HRTFData()

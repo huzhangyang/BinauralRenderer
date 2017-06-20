@@ -11,9 +11,8 @@ int main()
 	audio->InitPCM();
 	//audio->PlayPCM();
 
-	DataIO *data = new DataIO();
-	HRIRData *hrir = data->OpenMat("c://test.mat");
-	HRTFData *hrtf = data->ConvertToHRTF(hrir);
+	HRIRData *hrir = DataIO::OpenMat("c://test.mat");
+	HRTFData *hrtf = DataIO::ConvertToHRTF(hrir);
 
 	//Renderer *renderer = new Renderer();
 	//renderer->Render(vector<double>(), vector<double>());
