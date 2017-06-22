@@ -29,9 +29,15 @@ typedef vec3<float> vec3f;
 class Renderer
 {
 public:
+	static Renderer* Instance();
+
 	void SetSourcePos(float x, float y, float z);//set the position of sound source
 	void SetTargetPos(float x, float y, float z);//set the position of listener
 	void SetTargetOri(float angle); //set the orientation of listener (x,y,z)?
 	vector<double> Render(vector<double> input, vector<double> hrir);
 private:
+	Renderer() {};
+	static Renderer* instance;
+	vec3f sourcePos, targetPos, targetOri;
+
 };

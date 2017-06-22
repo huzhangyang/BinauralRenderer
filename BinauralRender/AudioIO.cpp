@@ -1,5 +1,17 @@
 #include "AudioIO.h"
 
+AudioIO* AudioIO::instance = nullptr;
+
+AudioIO* AudioIO::Instance()
+{
+	if (!instance)
+	{
+		instance = new AudioIO();
+		instance->Init();
+	}
+	return instance;
+}
+
 void AudioIO::Init()
 {
 	result = System_Create(&system);

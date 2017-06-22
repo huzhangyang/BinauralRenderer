@@ -1,10 +1,21 @@
 #include "Convolver.h"
 
+Convolver* Convolver::instance = nullptr;
+
+Convolver* Convolver::Instance()
+{
+	if (!instance)
+	{
+		instance = new Convolver();
+	}
+	return instance;
+}
+
 vector<double> Convolver::Convolve()
 {
 	vector<double> output;
-	int filterLength = filter.size();
-	int signalLength = signal.size();
+	int filterLength = (int)filter.size();
+	int signalLength = (int)signal.size();
 	int bufferLength = filterLength + signalLength - 1;
 	assert(filterLength > 0 && signalLength > 0);
 

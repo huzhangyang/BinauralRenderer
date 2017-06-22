@@ -15,10 +15,15 @@ using namespace std;
 class Convolver
 {
 public:
+	static Convolver* Instance();
+
 	vector<double> Convolve();
 	void SetCurrentSignal(vector<double> signal);
 	void SetCurrentFilter(vector<double> filter);
 private:
+	Convolver() {};
+	static Convolver* instance;
+
 	vector<double> buffer;
 	vector<double> signal;
 	vector<double> filter;

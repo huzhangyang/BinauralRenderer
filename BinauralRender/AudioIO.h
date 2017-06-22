@@ -20,12 +20,13 @@ using namespace FMOD;
 class AudioIO
 {
 public:
+
 	/* Life Cyle.
-	Call init to initialize the class.
+	The class is a singleton. No explicit init is needed.
 	Call update every frame in game engine.
 	Call release upon quit.
 	*/
-	void Init();
+	static AudioIO* Instance();
 	void Update();
 	void Release();
 
@@ -49,6 +50,11 @@ public:
 	void InitPCM();
 	void PlayPCM();
 private:
+	/*Singleton*/
+	AudioIO() {};
+	static AudioIO* instance;
+	void Init();
+
 	System *system;
 	Channel* channel;
 	Sound* sound;

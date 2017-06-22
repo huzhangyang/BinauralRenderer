@@ -1,5 +1,16 @@
 #include "Renderer.h"
 
+Renderer* Renderer::instance = nullptr;
+
+Renderer* Renderer::Instance()
+{
+	if (!instance)
+	{
+		instance = new Renderer();
+	}
+	return instance;
+}
+
 void Renderer::SetSourcePos(float x, float y, float z)
 {
 }
