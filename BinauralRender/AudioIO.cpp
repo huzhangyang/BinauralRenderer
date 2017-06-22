@@ -181,6 +181,9 @@ FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, 
 	}
 	context->ReadData(datalen);
 
+	context->leftChannelData = Renderer::Instance()->Render(context->leftChannelData, 0);
+	context->rightChannelData = Renderer::Instance()->Render(context->rightChannelData, 1);
+
 	//ConvertToPCM
 	short* pcm = (short*)data;
 	for (unsigned int i = 0; i < context->leftChannelData.size() + context->rightChannelData.size(); i++)

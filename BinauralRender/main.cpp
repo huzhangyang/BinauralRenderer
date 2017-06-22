@@ -8,8 +8,13 @@ int main()
 	AudioIO::Instance()->Open("c://test.mp3", true);
 	AudioIO::Instance()->InitPCM();
 
+
 	HRIRData *hrir = DataIO::OpenMat("c://test.mat");
 	HRTFData *hrtf = DataIO::ConvertToHRTF(hrir);
+
+	Renderer::Instance()->SetHRTF(hrtf);
+
+	AudioIO::Instance()->PlayPCM();
 
 	return 0;
 }

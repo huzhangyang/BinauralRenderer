@@ -9,6 +9,9 @@
 #include <vector>
 #include "fftw3.h"
 
+#include "Convolver.h"
+#include "DataIO.h"
+
 using namespace std;
 
 // Template for a simple vec3 container
@@ -31,13 +34,14 @@ class Renderer
 public:
 	static Renderer* Instance();
 
+	void SetHRTF(HRTFData* data);
 	void SetSourcePos(float x, float y, float z);//set the position of sound source
 	void SetTargetPos(float x, float y, float z);//set the position of listener
-	void SetTargetOri(float angle); //set the orientation of listener (x,y,z)?
-	vector<double> Render(vector<double> input, vector<double> hrir);
+	void SetTargetOri(float x, float y, float z); //set the orientation of listener
+	vector<double> Render(vector<double> data, int channel);// channel: 0 for left, 1 for right
 private:
 	Renderer() {};
 	static Renderer* instance;
 	vec3f sourcePos, targetPos, targetOri;
-
+	HRTFData* hrtf;
 };

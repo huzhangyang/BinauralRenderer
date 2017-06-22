@@ -14,6 +14,8 @@
 #include <fmod.hpp>
 #include <fmod_errors.h>
 
+#include "Renderer.h"
+
 using namespace std;
 using namespace FMOD;
 
