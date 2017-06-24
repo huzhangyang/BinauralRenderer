@@ -83,9 +83,9 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 {
 	HRTFData* data = new HRTFData();
 	//pre-measure
-	double* in = (double*)malloc(sizeof(double) * HRIR_LENGTH);
+	fftw_complex* in = (fftw_complex *)fftw_malloc(sizeof(double) * HRIR_LENGTH * 2);
 	fftw_complex* out = (fftw_complex *)fftw_malloc(sizeof(double) * HRIR_LENGTH * 2);
-	fftw_plan plan = fftw_plan_dft_r2c_1d(HRIR_LENGTH, in, out, FFTW_MEASURE);
+	fftw_plan plan = fftw_plan_dft_1d(HRIR_LENGTH, in, out, FFTW_FORWARD, FFTW_MEASURE);
 	fftw_execute(plan);
 
 	//fft to hrtf
@@ -93,18 +93,22 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 	{
 		for (int j = 0; j < ELEVATION_COUNT; j++)
 		{
+			//left channel
 			for (int k = 0; k < HRIR_LENGTH; k++)
 			{
-				in[k] = hrir->hrir_l[i][j][k];
+				in[k][0] = hrir->hrir_l[i][j][k];
+				in[k][1] = 0.0;
 			}
 			fftw_execute(plan);
 			for (int k = 0; k < HRIR_LENGTH; k++)
 			{
 				data->hrtf_l[i][j].push_back(out[k][0]);
 			}
+			//right channel
 			for (int k = 0; k < HRIR_LENGTH; k++)
 			{
-				in[k] = hrir->hrir_r[i][j][k];
+				in[k][0] = hrir->hrir_r[i][j][k];
+				in[k][1] = 0.0;
 			}
 			fftw_execute(plan);
 			for (int k = 0; k < HRIR_LENGTH; k++)
@@ -115,7 +119,7 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 	}
 
 	fftw_destroy_plan(plan);
-	free(in);
+	fftw_free(in);
 	fftw_free(out);
 
 	return data;

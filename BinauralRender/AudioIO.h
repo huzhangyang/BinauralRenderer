@@ -66,7 +66,7 @@ private:
 	/*
 	PCM related.
 	*/
-	const int DECODE_BUFFER_SIZE = 2048;
+	const int DECODE_BUFFER_SIZE = 512;
 	Channel* channelPCM;
 	Sound* soundPCM;
 	vector<double> leftChannelData;
