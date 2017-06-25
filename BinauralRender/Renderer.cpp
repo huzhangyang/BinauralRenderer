@@ -14,6 +14,7 @@ Renderer* Renderer::Instance()
 void Renderer::SetHRTF(HRTFData * data)
 {
 	hrtf = data;
+	Convolver::Instance()->SetSegmentLength(SEGMENT_LENGTH);
 }
 
 void Renderer::SetSourcePos(float x, float y, float z)

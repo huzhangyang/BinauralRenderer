@@ -14,6 +14,7 @@
 const int AZIMUTH_COUNT = 25;
 const int ELEVATION_COUNT = 50;
 const int HRIR_LENGTH = 200;
+const int SEGMENT_LENGTH = 256;
 
 using namespace std;
 
@@ -41,7 +42,7 @@ public:
 	@param azimuth: azimuth angle in degree. [-90, 90]
 	@param elevation: elevation angle in degree. [-90, 270]
 	@param nearest: if no specific hrtf data found given azimuth and elevation, use hrtf of nearest location.
-	@return HRTF data of length 200.
+	@return HRTF data of length SEGMENT_LENGTH.
 	*/
 	vector<double> GetLeftHRTF(float azimuth, float elevation, bool nearest = true);
 	vector<double> GetRightHRTF(float azimuth, float elevation, bool nearest = true);

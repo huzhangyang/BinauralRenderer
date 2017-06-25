@@ -18,13 +18,16 @@ public:
 	static Convolver* Instance();
 
 	vector<double> Convolve();
+	void SetSegmentLength(int segmentLength);
 	void SetCurrentSignal(vector<double> signal);
 	void SetCurrentFilter(vector<double> filter);
 private:
 	Convolver() {};
 	static Convolver* instance;
 
-	vector<double> buffer;
+	int segmentLength;
+	double* buffer;
+	double* output;
 	vector<double> signal;
 	vector<double> filter;
 
