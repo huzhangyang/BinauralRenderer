@@ -28,6 +28,8 @@ private:
 	int segmentLength;
 	double* buffer;
 	double* output;
+	double* tappedSignal;
+	double* result;
 	vector<double> signal;
 	vector<double> filter;
 

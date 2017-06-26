@@ -25,46 +25,45 @@ Advance your input pointer by 128 samples and go back to step 5. Repeat until th
 vector<double> Convolver::Convolve()
 {
 	vector<double> output;
-	int signalLength = (int)signal.size();
-	int segmentNum = signalLength / segmentLength * 2;
+	int segmentNum = (int)signal.size() * 2 / segmentLength;
+	int signalLength = segmentLength / 2;// TODO not always it (end)
 
 	int index = 0;
-	double* result = (double*)malloc(sizeof(double) * segmentLength);
-	fftw_plan plan = fftw_plan_r2r_1d(segmentLength, buffer, buffer, FFTW_R2HC, FFTW_MEASURE);//TODO FFTW_PATIENT ?
-	fftw_plan plan_i = fftw_plan_r2r_1d(segmentLength, result, result, FFTW_HC2R, FFTW_MEASURE);//TODO FFTW_PATIENT ?
-	fftw_execute(plan);
-	fftw_execute(plan_i);
+	fftw_plan plan = fftw_plan_r2r_1d(segmentLength, tappedSignal, tappedSignal, FFTW_R2HC, FFTW_PATIENT);
+	fftw_plan plan_i = fftw_plan_r2r_1d(segmentLength, result, result, FFTW_HC2R, FFTW_PATIENT);
 
 	for (int i = 0; i < segmentNum; i++)
 	{
-		for (int j = 0; j < segmentLength / 2; j++)
-			buffer[j] = signal[index++];
-		for (int j = segmentLength / 2; j < segmentLength; j++)
-			buffer[j] = 0;
+		for (int j = 0; j < signalLength; j++)
+			tappedSignal[j] = signal[index++];
+		for (int j = signalLength; j < segmentLength; j++)
+			tappedSignal[j] = 0;
 		//fft signal
 		fftw_execute(plan);
-		//Multiply the FFTs
-		
-		result[0] = buffer[0] * filter[0];
-		result[segmentLength - 1] = buffer[segmentLength - 1] * filter[segmentLength - 1];
+		//Multiply the FFTs		
+		result[0] = tappedSignal[0] * filter[0];
+		result[signalLength] = tappedSignal[signalLength] * filter[signalLength];
 		for (int j = 1; j < segmentLength / 2; j++)
 		{
 			int k = segmentLength - j;
-			result[j] = buffer[j] * filter[j] - buffer[k] * filter[k];
-			result[k] = buffer[j] * filter[k] + buffer[k] * filter[j];
+			result[j] = tappedSignal[j] * filter[j] - tappedSignal[k] * filter[k];
+			result[k] = tappedSignal[j] * filter[k] + tappedSignal[k] * filter[j];
 		}
 		//IFFT
 		fftw_execute(plan_i);
 		//overlap-add
-		for (int j = 0; j < segmentLength / 2; j++)
+		for (int j = 0; j < signalLength; j++)
 		{
-			output.push_back(signal[i * segmentLength / 2 + j] + result[j] / segmentLength);
+			output.push_back(buffer[j] + result[j] / segmentLength);
+		}
+		for (int j = signalLength; j < segmentLength; j++)
+		{
+			buffer[j - signalLength] = result[j] / segmentLength;
 		}
 	}
 
 	fftw_destroy_plan(plan);
 	fftw_destroy_plan(plan_i);
-	free(result);
 
 	return output;
 }
@@ -72,7 +71,9 @@ vector<double> Convolver::Convolve()
 void Convolver::SetSegmentLength(int segmentLength)
 {
 	this->segmentLength = segmentLength;
-	buffer = (double*)malloc(sizeof(double) * segmentLength);
+	tappedSignal = (double*)malloc(sizeof(double) * segmentLength);
+	buffer = (double*)malloc(sizeof(double) * segmentLength / 2);
+	result = (double*)malloc(sizeof(double) * segmentLength);
 }
 
 void Convolver::SetCurrentSignal(vector<double> signal)
