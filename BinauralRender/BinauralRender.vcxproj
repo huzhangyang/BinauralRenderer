@@ -139,13 +139,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AudioIO.h" />
-    <ClInclude Include="Convolver.h" />
     <ClInclude Include="DataIO.h" />
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AudioIO.cpp" />
-    <ClCompile Include="Convolver.cpp" />
     <ClCompile Include="DataIO.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />

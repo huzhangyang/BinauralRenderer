@@ -14,7 +14,6 @@
 const int AZIMUTH_COUNT = 25;
 const int ELEVATION_COUNT = 50;
 const int HRIR_LENGTH = 200;
-const int SEGMENT_LENGTH = 256;
 
 using namespace std;
 
@@ -37,6 +36,17 @@ public:
 	vector<double> hrtf_r[AZIMUTH_COUNT][ELEVATION_COUNT];
 
 	HRTFData();
+
+	/* The length of HRTF data.*/
+	int length;
+
+	/* Get HRTF data.
+	@param azimuth: azimuth angle in degree. [-90, 90]
+	@param elevation: elevation angle in degree. [-90, 270]
+	@param nearest: if no specific hrtf data found given azimuth and elevation, use hrtf of nearest location.
+	@return HRTF data in pointer left & right.
+	*/
+	void GetHRTF(float azimuth, float elevation, vector<double>& left, vector<double>& right ,bool nearest = true);
 
 	/* Get HRTF data.
 	@param azimuth: azimuth angle in degree. [-90, 90]
@@ -78,4 +88,8 @@ public:
 	static HRTFData* ConvertToHRTF(HRIRData* hrir);
 
 private:
+	/* Calculate the best HRTF length of power 2 according to the length of HRIR. 
+	e.g. HRTF length should be 256 in the case of HRIR length of 200.
+	*/
+	static int CalculateHRTFLength();
 };

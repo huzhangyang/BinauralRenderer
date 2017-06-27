@@ -82,9 +82,12 @@ HRIRData* DataIO::OpenMat(const char* filename)
 HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 {
 	HRTFData* data = new HRTFData();
+	int length = CalculateHRTFLength();
+	data->length = length;
+
 	//pre-measure
-	double* inout = (double*)malloc(sizeof(double) * SEGMENT_LENGTH);
-	fftw_plan plan = fftw_plan_r2r_1d(SEGMENT_LENGTH, inout, inout, FFTW_R2HC, FFTW_MEASURE);
+	double* inout = (double*)malloc(sizeof(double) * length);
+	fftw_plan plan = fftw_plan_r2r_1d(length, inout, inout, FFTW_R2HC, FFTW_MEASURE);
 	fftw_execute(plan);
 
 	//fft to hrtf
@@ -92,35 +95,34 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 	{
 		for (int j = 0; j < ELEVATION_COUNT; j++)
 		{
-			//left channel data
+			//left channel data & zero padding
 			for (int k = 0; k < HRIR_LENGTH; k++)
 			{
 				inout[k] = hrir->hrir_l[i][j][k];
 			}
-			//left channel zero padding
-			for (int k = HRIR_LENGTH; k < SEGMENT_LENGTH; k++)
+			for (int k = HRIR_LENGTH; k < length; k++)
 			{
 				inout[k] = 0.0;
 			}
 			//left channel HRTF output
 			fftw_execute(plan);
-			for (int k = 0; k < SEGMENT_LENGTH; k++)
+			for (int k = 0; k < length; k++)
 			{
 				data->hrtf_l[i][j].push_back(inout[k]);
 			}
-			//right channel data
+			//right channel data & zero padding
 			for (int k = 0; k < HRIR_LENGTH; k++)
 			{
 				inout[k] = hrir->hrir_r[i][j][k];
 			}
-			//right channel zero padding
-			for (int k = HRIR_LENGTH; k < SEGMENT_LENGTH; k++)
+			//right channel 
+			for (int k = HRIR_LENGTH; k < length; k++)
 			{
 				inout[k] = 0.0;
 			}
 			//right channel HRTF output
 			fftw_execute(plan);
-			for (int k = 0; k < SEGMENT_LENGTH; k++)
+			for (int k = 0; k < length; k++)
 			{
 				data->hrtf_r[i][j].push_back(inout[k]);
 			}
@@ -131,6 +133,14 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 	free(inout);
 
 	return data;
+}
+
+int DataIO::CalculateHRTFLength()
+{
+	int length = 2;
+	while (length < HRIR_LENGTH)
+		length *= 2;
+	return length;
 }
 
 HRTFData::HRTFData()
@@ -148,6 +158,21 @@ HRTFData::HRTFData()
 		elevations[i] = -45 + 5.625f * i;
 }
 
+void HRTFData::GetHRTF(float azimuth, float elevation, vector<double>& left, vector<double>& right, bool nearest)
+{
+	int azimuthIndex = GetAzimuthIndex(azimuth, nearest);
+	int elevationIndex = GetElevationIndex(elevation, nearest);
+	if (azimuthIndex >= 0 && elevationIndex >= 0)
+	{
+		left = hrtf_l[azimuthIndex][elevationIndex];
+		right = hrtf_r[azimuthIndex][elevationIndex];
+	}
+	else
+	{
+		printf("GetHRTF Failed at %f %f.\n", azimuth, elevation);
+	}
+}
+
 vector<double> HRTFData::GetLeftHRTF(float azimuth, float elevation, bool nearest)
 {
 	int azimuthIndex = GetAzimuthIndex(azimuth, nearest);
@@ -158,7 +183,7 @@ vector<double> HRTFData::GetLeftHRTF(float azimuth, float elevation, bool neares
 	}
 	else
 	{
-		printf("GetLeftHRIR Failed at %f %f.\n", azimuth, elevation);
+		printf("GetLeftHRTF Failed at %f %f.\n", azimuth, elevation);
 		return vector<double>();
 	}
 }
@@ -173,7 +198,7 @@ vector<double> HRTFData::GetRightHRTF(float azimuth, float elevation, bool neare
 	}
 	else
 	{
-		printf("GetRightHRIR Failed at %f %f.\n", azimuth, elevation);
+		printf("GetRightHRTF Failed at %f %f.\n", azimuth, elevation);
 		return vector<double>();
 	}
 }

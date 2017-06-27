@@ -9,7 +9,6 @@
 #include <vector>
 #include "fftw3.h"
 
-#include "Convolver.h"
 #include "DataIO.h"
 
 using namespace std;
@@ -38,10 +37,22 @@ public:
 	void SetSourcePos(float x, float y, float z);//set the position of sound source
 	void SetTargetPos(float x, float y, float z);//set the position of listener
 	void SetTargetOri(float x, float y, float z); //set the orientation of listener
-	vector<double> Render(vector<double> data, int channel);// channel: 0 for left, 1 for right
+	void Render(vector<double>& left, vector<double>& right);
 private:
 	Renderer() {};
 	static Renderer* instance;
 	vec3f sourcePos, targetPos, targetOri;
 	HRTFData* hrtf;
+
+	/*Convolution*/
+	int segmentLength;
+	double* buffer;
+	double* output;
+	double* tappedSignal;
+	double* result;
+	fftw_plan plan_f;
+	fftw_plan plan_i;
+	vector<double> Convolve(vector<double> signal, vector<double> filter);
+	void SetSegmentLength(int segmentLength);
+	void Release();
 };
