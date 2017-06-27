@@ -2,10 +2,11 @@
 #include "DataIO.h"
 #include "Renderer.h"
 #include <iostream>
+#include <windows.h>
 
 int main()
 {	
-	AudioIO::Instance()->Open("c://test.mp3", true);
+	AudioIO::Instance()->Open("c://test2.mp3", true);
 	AudioIO::Instance()->InitPCM();
 
 
@@ -15,6 +16,13 @@ int main()
 	Renderer::Instance()->SetHRTF(hrtf);
 
 	AudioIO::Instance()->PlayPCM();
+
+	bool playing = true;
+	while (playing)
+	{
+		AudioIO::Instance()->Update();
+		Sleep(1000 / 60);
+	}
 
 	return 0;
 }

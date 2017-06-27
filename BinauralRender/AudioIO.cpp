@@ -126,13 +126,6 @@ void AudioIO::PlayPCM()
 {
 	result = system->playSound(soundPCM, 0, false, &channelPCM);
 	ErrorHandle();
-
-	bool playing = true;
-	while (playing)
-	{
-		Update();
-		channelPCM->isPlaying(&playing);
-	}
 }
 
 void AudioIO::ErrorHandle()
