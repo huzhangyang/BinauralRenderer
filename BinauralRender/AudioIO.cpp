@@ -158,7 +158,7 @@ void AudioIO::ReadData(unsigned int size)
 	//ConvertToDoubleVector
 	leftChannelData.resize(actualReadSize / sizeof(short) / 2);
 	rightChannelData.resize(actualReadSize / sizeof(short) / 2);
-	for (unsigned int i = 0; i < actualReadSize / sizeof(short); i++)
+	for (size_t i = 0; i < actualReadSize / sizeof(short); i++)
 	{
 		double value = (double)currentDataBlock[i] / 32768.0;
 		if (value > 1) value = 1.0;
@@ -183,8 +183,8 @@ FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, 
 
 	//ConvertToPCM
 	short* pcm = (short*)data;
-	int totalSize = context->leftChannelData.size() + context->rightChannelData.size();
-	for (unsigned int i = 0; i < totalSize; i++)
+	size_t totalSize = context->leftChannelData.size() + context->rightChannelData.size();
+	for (size_t i = 0; i < totalSize; i++)
 	{
 		short value = i % 2 == 0 ? (short)(context->leftChannelData[i / 2] * 32768) : (short)(context->rightChannelData[i / 2] * 32768);
 		if (value > 32767) value = 32767;
