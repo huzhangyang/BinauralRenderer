@@ -40,9 +40,6 @@ void Renderer::SetTargetOri(float x, float y, float z)
 
 vector<double> Renderer::Render(vector<double> data, int channel)
 {
-	Convolver::Instance()->SetCurrentSignal(data);
-	auto filter = channel == 0 ? hrtf->GetLeftHRTF(0, 0) : hrtf->GetRightHRTF(0, 0);
-	Convolver::Instance()->SetCurrentFilter(filter);
-	
-	return Convolver::Instance()->Convolve();
+	auto filter = channel == 0 ? hrtf->GetLeftHRTF(90, 0) : hrtf->GetRightHRTF(90, 0);
+	return Convolver::Instance()->Convolve(data, filter);
 }

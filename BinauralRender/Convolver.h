@@ -17,10 +17,9 @@ class Convolver
 public:
 	static Convolver* Instance();
 
-	vector<double> Convolve();
+	vector<double> Convolve(vector<double> signal, vector<double> filter);
 	void SetSegmentLength(int segmentLength);
-	void SetCurrentSignal(vector<double> signal);
-	void SetCurrentFilter(vector<double> filter);
+	void Release();
 private:
 	Convolver() {};
 	static Convolver* instance;
@@ -30,7 +29,6 @@ private:
 	double* output;
 	double* tappedSignal;
 	double* result;
-	vector<double> signal;
-	vector<double> filter;
-
+	fftw_plan plan_f;
+	fftw_plan plan_i;
 };
