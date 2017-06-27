@@ -19,6 +19,10 @@ void AudioIO::Init()
 
 	result = system->init(512, FMOD_INIT_NORMAL, 0);
 	ErrorHandle();
+
+	leftChannelData.resize(DECODE_BUFFER_SIZE);
+	rightChannelData.resize(DECODE_BUFFER_SIZE);
+	currentDataBlock = (short*)malloc(DECODE_BUFFER_SIZE * 2 * sizeof(short));
 }
 
 void AudioIO::Update()
@@ -31,6 +35,10 @@ void AudioIO::Release()
 	sound->release();
 	soundPCM->release();
 	system->release();
+
+	leftChannelData.clear();
+	rightChannelData.clear();
+	free(currentDataBlock);
 }
 
 void AudioIO::Open(const char * filename, bool openOnly)
@@ -138,9 +146,8 @@ void AudioIO::ErrorHandle()
 
 void AudioIO::ReadData(unsigned int size)
 {
-	short* dataBlock = (short*)malloc(size);//pcm 16bits data 
 	unsigned int actualReadSize;
-	result = sound->readData(&dataBlock[0], size, &actualReadSize);
+	result = sound->readData(&currentDataBlock[0], size, &actualReadSize);
 	if (result != FMOD_OK)
 	{
 		channelPCM->stop();
@@ -149,17 +156,15 @@ void AudioIO::ReadData(unsigned int size)
 	ErrorHandle();
 
 	//ConvertToDoubleVector
-	leftChannelData.clear();
-	rightChannelData.clear();
+	leftChannelData.resize(actualReadSize / sizeof(short) / 2);
+	rightChannelData.resize(actualReadSize / sizeof(short) / 2);
 	for (unsigned int i = 0; i < actualReadSize / sizeof(short); i++)
 	{
-		double value = (double)dataBlock[i] / 32768.0;
+		double value = (double)currentDataBlock[i] / 32768.0;
 		if (value > 1) value = 1.0;
 		if (value < -1) value = -1.0;
-		i % 2 == 0 ? leftChannelData.push_back(value) : rightChannelData.push_back(value);
+		i % 2 == 0 ? leftChannelData[i / 2] = value : rightChannelData[i / 2] = value;
 	}
-
-	free(dataBlock);
 }
 
 FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, unsigned int datalen)
@@ -178,7 +183,8 @@ FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, 
 
 	//ConvertToPCM
 	short* pcm = (short*)data;
-	for (unsigned int i = 0; i < context->leftChannelData.size() + context->rightChannelData.size(); i++)
+	int totalSize = context->leftChannelData.size() + context->rightChannelData.size();
+	for (unsigned int i = 0; i < totalSize; i++)
 	{
 		short value = i % 2 == 0 ? (short)(context->leftChannelData[i / 2] * 32768) : (short)(context->rightChannelData[i / 2] * 32768);
 		if (value > 32767) value = 32767;

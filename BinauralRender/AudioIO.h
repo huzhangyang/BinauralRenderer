@@ -69,6 +69,7 @@ private:
 	const int DECODE_BUFFER_SIZE = 2048;
 	Channel* channelPCM;
 	Sound* soundPCM;
+	short* currentDataBlock;
 	vector<double> leftChannelData;
 	vector<double> rightChannelData;
 

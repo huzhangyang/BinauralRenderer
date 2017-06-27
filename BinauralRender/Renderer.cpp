@@ -41,7 +41,7 @@ void Renderer::SetTargetOri(float x, float y, float z)
 void Renderer::Render(vector<double>& left, vector<double>& right)
 {
 	vector<double> leftHRTF, rightHRTF;
-	hrtf->GetHRTF(90, 0, leftHRTF, rightHRTF);
+	hrtf->GetHRTF(0, 0, leftHRTF, rightHRTF);
 	left = Convolve(left, leftHRTF);
 	right = Convolve(right, rightHRTF);
 }
@@ -59,9 +59,10 @@ Advance your input pointer by 128 samples and go back to step 5. Repeat until th
 
 vector<double> Renderer::Convolve(vector<double> signal, vector<double> filter)
 {
-	vector<double> output;
-	int segmentNum = (int)signal.size() * 2 / segmentLength;
+	int signalSize = (int)signal.size();
+	int segmentNum = signalSize * 2 / segmentLength;
 	int signalLength = segmentLength / 2;// TODO not always it (end)
+	output.resize(signalSize);
 
 	int index = 0;
 	for (int i = 0; i < signalLength; i++)
@@ -90,7 +91,7 @@ vector<double> Renderer::Convolve(vector<double> signal, vector<double> filter)
 		//overlap-add
 		for (int j = 0; j < signalLength; j++)
 		{
-			output.push_back(buffer[j] + result[j] / segmentLength);
+			output[i * signalLength + j] = buffer[j] + result[j] / segmentLength;
 		}
 		for (int j = signalLength; j < segmentLength; j++)
 		{
@@ -117,9 +118,9 @@ void Renderer::SetSegmentLength(int segmentLength)
 void Renderer::Release()
 {
 	free(buffer);
-	free(output);
 	free(tappedSignal);
 	free(result);
 	fftw_destroy_plan(plan_f);
 	fftw_destroy_plan(plan_i);
+	output.clear();
 }

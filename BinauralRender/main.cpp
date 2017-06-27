@@ -1,7 +1,6 @@
 #include "AudioIO.h"
 #include "DataIO.h"
 #include "Renderer.h"
-#include <iostream>
 #include <windows.h>
 
 int main()

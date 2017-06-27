@@ -106,9 +106,10 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 			}
 			//left channel HRTF output
 			fftw_execute(plan);
+			data->hrtf_l[i][j].resize(length);
 			for (int k = 0; k < length; k++)
 			{
-				data->hrtf_l[i][j].push_back(inout[k]);
+				data->hrtf_l[i][j][k] = inout[k];
 			}
 			//right channel data & zero padding
 			for (int k = 0; k < HRIR_LENGTH; k++)
@@ -122,9 +123,10 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 			}
 			//right channel HRTF output
 			fftw_execute(plan);
+			data->hrtf_r[i][j].resize(length);
 			for (int k = 0; k < length; k++)
 			{
-				data->hrtf_r[i][j].push_back(inout[k]);
+				data->hrtf_r[i][j][k] = inout[k];
 			}
 		}
 	}

@@ -47,9 +47,9 @@ private:
 	/*Convolution*/
 	int segmentLength;
 	double* buffer;
-	double* output;
 	double* tappedSignal;
 	double* result;
+	vector<double> output;
 	fftw_plan plan_f;
 	fftw_plan plan_i;
 	vector<double> Convolve(vector<double> signal, vector<double> filter);
