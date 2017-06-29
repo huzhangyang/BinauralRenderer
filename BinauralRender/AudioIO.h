@@ -66,7 +66,7 @@ private:
 	/*
 	PCM related.
 	*/
-	const int DECODE_BUFFER_SIZE = 2048;
+	const int DECODE_BUFFER_SIZE = 1024;
 	Channel* channelPCM;
 	Sound* soundPCM;
 	short* currentDataBlock;

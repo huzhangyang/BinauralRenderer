@@ -116,7 +116,6 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 			{
 				inout[k] = hrir->hrir_r[i][j][k];
 			}
-			//right channel 
 			for (int k = HRIR_LENGTH; k < length; k++)
 			{
 				inout[k] = 0.0;

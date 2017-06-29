@@ -16,9 +16,9 @@ int main()
 
 	AudioIO::Instance()->PlayPCM();
 
-	bool playing = true;
-	while (playing)
+	while (true)
 	{
+		Renderer::Instance()->Update(vec3f(-1, 0, 0), vec3f(0, 0, 0), vec3f(0, 0, 0));
 		AudioIO::Instance()->Update();
 		Sleep(1000 / 60);
 	}

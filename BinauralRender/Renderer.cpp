@@ -14,34 +14,51 @@ Renderer* Renderer::Instance()
 void Renderer::SetHRTF(HRTFData * data)
 {
 	hrtf = data;
-	SetSegmentLength(hrtf->length);
+	segmentLength = hrtf->length;
+
+	Release();
+
+	signal = (double*)malloc(sizeof(double) * segmentLength);
+	buffer = (double*)malloc(sizeof(double) * segmentLength / 2);
+	result = (double*)malloc(sizeof(double) * segmentLength);
+	plan_f = fftw_plan_r2r_1d(segmentLength, signal, signal, FFTW_R2HC, FFTW_MEASURE);
+	plan_i = fftw_plan_r2r_1d(segmentLength, result, result, FFTW_HC2R, FFTW_MEASURE);
+	fftw_execute(plan_f);
+	fftw_execute(plan_i);
 }
 
-void Renderer::SetSourcePos(float x, float y, float z)
+void Renderer::Update(vec3f sourcePos, vec3f listenerPos, vec3f listenerOri)
 {
-	sourcePos.x = x;
-	sourcePos.y = y;
-	sourcePos.z = z;
-}
-
-void Renderer::SetTargetPos(float x, float y, float z)
-{
-	targetPos.x = x;
-	targetPos.y = y;
-	targetPos.z = z;
-}
-
-void Renderer::SetTargetOri(float x, float y, float z)
-{
-	targetOri.x = x;
-	targetOri.y = y;
-	targetOri.z = z;
+	//azimuth = arctan(y / x)
+	float deltaX = sourcePos.x - listenerPos.x;
+	float deltaY = sourcePos.y - listenerPos.y;
+	float deltaZ = sourcePos.z - listenerPos.z;
+	if (deltaX == 0 && deltaY == 0)
+		azimuth = 0;
+	else
+		azimuth = atan2(deltaY, deltaX) * 180 / PI;
+	//elevation = 90 - arccos(z / r)
+	float r = pow(deltaX, 2.0f) + pow(deltaY, 2.0f) + pow(deltaZ, 2.0f);
+	r = sqrt(r);
+	elevation = 90 - acos(deltaZ / r) * 180 / PI;
+	//cast azimuth to -90~90 and elevation to -90~270
+	if (azimuth > 90)
+	{
+		azimuth = 180 - azimuth;
+		elevation = elevation < 0 ? 360 + elevation : 180 - elevation;
+	}
+	else if (azimuth < -90)
+	{
+		azimuth = -180 - azimuth;
+		elevation = elevation < 0 ? 360 + elevation : 180 - elevation;
+	}
+	//printf("azimuth: %f, elevation: %f\n", azimuth, elevation);
 }
 
 void Renderer::Render(vector<double>& left, vector<double>& right)
 {
 	vector<double> leftHRTF, rightHRTF;
-	hrtf->GetHRTF(0, 0, leftHRTF, rightHRTF);
+	hrtf->GetHRTF(azimuth, elevation, leftHRTF, rightHRTF);
 	left = Convolve(left, leftHRTF);
 	right = Convolve(right, rightHRTF);
 }
@@ -90,19 +107,6 @@ vector<double> Renderer::Convolve(vector<double> _signal, vector<double> _filter
 	}
 
 	return output;
-}
-
-void Renderer::SetSegmentLength(int segmentLength)
-{
-	this->segmentLength = segmentLength;
-	Release();
-	signal = (double*)malloc(sizeof(double) * segmentLength);
-	buffer = (double*)malloc(sizeof(double) * segmentLength / 2);
-	result = (double*)malloc(sizeof(double) * segmentLength);
-	plan_f = fftw_plan_r2r_1d(segmentLength, signal, signal, FFTW_R2HC, FFTW_MEASURE);
-	plan_i = fftw_plan_r2r_1d(segmentLength, result, result, FFTW_HC2R, FFTW_MEASURE);
-	fftw_execute(plan_f);
-	fftw_execute(plan_i);
 }
 
 void Renderer::Release()
