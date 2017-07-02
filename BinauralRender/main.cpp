@@ -12,15 +12,17 @@ int main()
 	Renderer::Instance()->SetHRTF(hrtf);
 
 	AudioIO::Instance()->PlayAudioSource("test");
+	Renderer::Instance()->SetAudioSource("test", vec3f(0, 0, 0));
+	Renderer::Instance()->SetListener(vec3f(0, 0, 0), vec3f(0, 0, 0));
 
 	while (true)
 	{
-		Renderer::Instance()->Update(vec3f(-1, 0, 0), vec3f(0, 0, 0), vec3f(0, 0, 0));
 		AudioIO::Instance()->Update();
 		Sleep(1000 / 60);
 	}
 
 	AudioIO::Instance()->Release();
+	Renderer::Instance()->Release();
 
 	return 0;
 }

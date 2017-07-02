@@ -7,6 +7,7 @@
 *******************************************************************/
 
 #include <vector>
+#include <map>
 #include <cmath>
 #include "fftw3.h"
 
@@ -35,6 +36,8 @@ struct vec3
 		this->y = y;
 		this->z = z;
 	}
+
+	vec3() {}
 };
 typedef vec3<float> vec3f;
 
@@ -42,18 +45,38 @@ class Renderer
 {
 public:
 	static Renderer* Instance();
+	/* Life Cyle.
+	The class is a singleton. No explicit init is needed.
+	Call release upon quit.
+	*/
+	void Release();
 
+	/*Set the HRTF to render.*/
 	void SetHRTF(HRTFData* data);
-	void Update(vec3f sourcePos, vec3f targetPos, vec3f targetOri);
-	void Render(vector<double>& left, vector<double>& right);
+
+	/*Main render function.*/
+	void Render(vector<double>& left, vector<double>& right, bool useHRTF = true);
+
+	/*Set position & orientation for audio source and listener. See "export.cpp" for details. */
+	void SetAudioSource(const char* sourceID, vec3f pos);
+	void SetListener(vec3f pos, vec3f ori);
 private:
+	/*Singleton modules.*/
 	Renderer() {};
 	static Renderer* instance;
 
+	/*Private functions.*/
+	void GetAzimuthAndElevation(const char* sourceID);
+	vector<double> Convolve(vector<double> signal, vector<double> filter);
+
+	/*Used for HRTF.*/
+	vec3f listenerPos;
+	vec3f listenerOri;
+	map<const char*, vec3f> sourcePos;
 	float azimuth, elevation;
 	HRTFData* hrtf;
 
-	/*Convolution*/
+	/*Used in convolution.*/
 	int segmentLength;
 	double* buffer;
 	double* signal;
@@ -62,7 +85,4 @@ private:
 	vector<double> output;
 	fftw_plan plan_f;
 	fftw_plan plan_i;
-	vector<double> Convolve(vector<double> signal, vector<double> filter);
-
-	void Release();
 };

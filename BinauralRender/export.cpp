@@ -83,6 +83,7 @@ extern "C"
 	__declspec(dllexport) void ReleaseAudioEngine()
 	{
 		AudioIO::Instance()->Release();
+		Renderer::Instance()->Release();
 	}
 
 	/*
@@ -101,9 +102,9 @@ extern "C"
 	sourceID: An custom ID used to uniquely identify the source object.
 	posx, posy, posz: the position in x,y,z axis of the audio source.
 	*/
-	__declspec(dllexport) void SetAudiosource(const char* sourceID, float posx, float posy, float posz)
+	__declspec(dllexport) void SetAudioSource(const char* sourceID, float posx, float posy, float posz)
 	{
-		//Renderer::Instance()->Update(vec3f(0, 0, 0), vec3f(posx, posy, posz), vec3f(orix, oriy, oriz));
+		Renderer::Instance()->SetAudioSource(sourceID, vec3f(posx, posy, posz));
 	}
 
 	/*
@@ -113,6 +114,6 @@ extern "C"
 	*/
 	__declspec(dllexport) void SetListener(float posx, float posy, float posz, float orix, float oriy, float oriz)
 	{
-		//Renderer::Instance()->Update(vec3f(0, 0, 0), vec3f(posx, posy, posz), vec3f(orix, oriy, oriz));
+		Renderer::Instance()->SetListener( vec3f(posx, posy, posz), vec3f(orix, oriy, oriz));
 	}
 }
