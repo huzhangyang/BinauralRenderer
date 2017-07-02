@@ -55,6 +55,7 @@ public:
 	bool IsAudioSourcePlaying(const char* sourceID);
 	void SetAudioSourceHRTF(const char* sourceID, bool enable);
 
+	void OutputToWAV(const char* sourceID, const char* output);
 private:
 	/*Singleton modules.*/
 	AudioIO() {};

@@ -155,6 +155,28 @@ void AudioIO::SetAudioSourceHRTF(const char * sourceID, bool enable)
 	}
 }
 
+void AudioIO::OutputToWAV(const char * sourceID, const char * output)
+{
+	System *systemNRT;
+	result = FMOD::System_Create(&systemNRT);
+	ErrorHandle();
+	result = systemNRT->setOutput(FMOD_OUTPUTTYPE_WAVWRITER_NRT);
+	ErrorHandle();
+	result = systemNRT->init(1, FMOD_INIT_STREAM_FROM_UPDATE, (void*)output);
+	ErrorHandle();
+
+	printf("Outputing to %s, it might take a few minutes. Please wait.\n", output);
+	systemNRT->playSound(audioSources[sourceID]->pcm, 0, false, &audioSources[sourceID]->channel);
+	while (IsAudioSourcePlaying(sourceID))
+	{
+		systemNRT->update();
+	}
+
+	systemNRT->close();
+	systemNRT->release();
+	printf("Outputing Complete.");
+}
+
 void AudioIO::ErrorHandle()
 {
 	if (result != FMOD_OK)
@@ -179,7 +201,7 @@ FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, 
 	result = as->source->readData(&currentDataBlock[0], datalen, &actualReadSize);
 	if (result != FMOD_OK)
 	{
-		//channel->stop();
+		as->channel->stop();
 		return result;
 	}
 

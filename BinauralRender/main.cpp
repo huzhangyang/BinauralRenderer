@@ -5,15 +5,17 @@
 
 int main()
 {	
-	AudioIO::Instance()->AddAudioSource("c://test2.mp3", "test");
+	auto id = "test";
+	AudioIO::Instance()->AddAudioSource("c://test.mp3", id);
 
 	HRIRData *hrir = DataIO::OpenMat("c://test.mat");
 	HRTFData *hrtf = DataIO::ConvertToHRTF(hrir);
 	Renderer::Instance()->SetHRTF(hrtf);
-
-	AudioIO::Instance()->PlayAudioSource("test");
-	Renderer::Instance()->SetAudioSource("test", vec3f(0, 0, 0));
+	Renderer::Instance()->SetAudioSource(id, vec3f(0, 0, 0));
 	Renderer::Instance()->SetListener(vec3f(0, 0, 0), vec3f(0, 0, 0));
+
+	AudioIO::Instance()->OutputToWAV(id, "test.wav");
+	AudioIO::Instance()->PlayAudioSource(id);
 
 	while (true)
 	{
