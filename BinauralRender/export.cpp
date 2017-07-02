@@ -68,6 +68,15 @@ extern "C"
 	}
 
 	/*
+	Set hrtf effect enabled or not for an audio source.
+	sourceID: An custom ID used to uniquely identify the source object.
+	*/
+	__declspec(dllexport) void SetAudioSourceHRTF(const char* sourceID, bool enable)
+	{
+		return AudioIO::Instance()->SetAudioSourceHRTF(sourceID, enable);
+	}
+
+	/*
 	Update the audio engine. The audio playback is driven by the update function.
 	Should be called with the update function in the game engine.
 	*/

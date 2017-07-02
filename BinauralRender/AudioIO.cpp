@@ -29,18 +29,15 @@ void AudioIO::Update()
 void AudioIO::Release()
 {
 	for (const auto& kvp : audioSources)
-	{//release every sound and its source
-		void* source;
-		result = kvp.second->getUserData(&source);
-		ErrorHandle();
-		((Sound*)source)->release();
-		kvp.second->release();
+	{//release every AudioSource
+		AudioSource* as = kvp.second;
+		as->source->release();
+		as->pcm->release();
 	}
 	system->close();
 	system->release();
 
 	audioSources.clear();
-	channels.clear();
 }
 
 void AudioIO::AddAudioSource(const char * filename, const char* sourceID)
@@ -84,30 +81,31 @@ void AudioIO::AddAudioSource(const char * filename, const char* sourceID)
 	result = system->createStream(0, FMOD_OPENUSER | FMOD_OPENONLY, &exinfo, &soundPCM);
 	ErrorHandle();
 
-	result = soundPCM->setUserData(sound);//pass audio source to userData so as to get from callback
+	AudioSource* as = new AudioSource();
+	as->source = sound;
+	as->pcm = soundPCM;
+	as->sourceID = sourceID;
+
+	result = soundPCM->setUserData(as);//pass audio source to userData so as to get from callback
 	ErrorHandle();
 
 	if (audioSources.count(sourceID) == 1)
 	{
-		void* source;
-		result = audioSources[sourceID]->getUserData(&source);
-		ErrorHandle();
-		((Sound*)source)->release();
-		audioSources[sourceID]->release();
+		AudioSource* _as = audioSources[sourceID];
+		_as->source->release();
+		_as->pcm->release();
 		audioSources.erase(sourceID);
 	}
-	audioSources.insert(pair<const char*, Sound*>(sourceID, soundPCM));
+	audioSources.insert(pair<const char*, AudioSource*>(sourceID, as));
 }
 
 void AudioIO::RemoveAudioSource(const char * sourceID)
 {
 	if (audioSources.count(sourceID) == 1)
 	{
-		void* source;
-		result = audioSources[sourceID]->getUserData(&source);
-		ErrorHandle();
-		((Sound*)source)->release();
-		audioSources[sourceID]->release();
+		AudioSource* _as = audioSources[sourceID];
+		_as->source->release();
+		_as->pcm->release();
 		audioSources.erase(sourceID);
 	}
 }
@@ -116,39 +114,45 @@ void AudioIO::PlayAudioSource(const char * sourceID)
 {
 	if (audioSources.count(sourceID) == 1)
 	{
-		Channel* channel;
-		channels.insert(pair<const char*, Channel*>(sourceID, channel));
-		result = system->playSound(audioSources[sourceID], 0, false, &channels[sourceID]);
+		result = system->playSound(audioSources[sourceID]->pcm, 0, false, &audioSources[sourceID]->channel);
 		ErrorHandle();
 	}
 }
 
 void AudioIO::StopAudioSource(const char * sourceID)
 {
-	if (channels.count(sourceID) == 1)
+	if (audioSources.count(sourceID) == 1)
 	{
-		channels[sourceID]->stop();
+		audioSources[sourceID]->channel->stop();
 	}
 }
 
 void AudioIO::ToggleAudioSourcePlaying(const char * sourceID)
 {
-	if (channels.count(sourceID) == 1)
+	if (audioSources.count(sourceID) == 1)
 	{
 		bool x;
-		result = channels[sourceID]->isPlaying(&x);
-		channels[sourceID]->setPaused(!x);
+		result = audioSources[sourceID]->channel->isPlaying(&x);
+		audioSources[sourceID]->channel->setPaused(!x);
 	}
 }
 
 bool AudioIO::IsAudioSourcePlaying(const char * sourceID)
 {
 	bool ret = false;
-	if (channels.count(sourceID) == 1)
+	if (audioSources.count(sourceID) == 1)
 	{
-		channels[sourceID]->isPlaying(&ret);
+		audioSources[sourceID]->channel->isPlaying(&ret);
 	}
 	return ret;
+}
+
+void AudioIO::SetAudioSourceHRTF(const char * sourceID, bool enable)
+{
+	if (audioSources.count(sourceID) == 1)
+	{
+		audioSources[sourceID]->hrtfEnabled = enable;
+	}
 }
 
 void AudioIO::ErrorHandle()
@@ -162,17 +166,17 @@ void AudioIO::ErrorHandle()
 FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, unsigned int datalen)
 {
 	void *userData;
-	Sound* source;
+	AudioSource* as;
 	FMOD_RESULT result = ((Sound*)_sound)->getUserData(&userData);
-	source = (Sound*) userData;
-	if (result != FMOD_OK || source == NULL)
+	as = (AudioSource*) userData;
+	if (result != FMOD_OK || as == NULL)
 	{
 		return FMOD_ERR_INVALID_PARAM;
 	}
 	//read data from source
 	unsigned int actualReadSize;
 	short* currentDataBlock = (short*)malloc(DECODE_BUFFER_SIZE * 2 * sizeof(short));
-	result = source->readData(&currentDataBlock[0], datalen, &actualReadSize);
+	result = as->source->readData(&currentDataBlock[0], datalen, &actualReadSize);
 	if (result != FMOD_OK)
 	{
 		//channel->stop();
@@ -194,7 +198,7 @@ FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, 
 	}
 
 	//Rendering
-	Renderer::Instance()->Render(leftChannelData, rightChannelData);
+	Renderer::Instance()->Render(leftChannelData, rightChannelData, as->sourceID, as->hrtfEnabled);
 
 	//ConvertToPCM
 	short* pcm = (short*)data;

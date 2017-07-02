@@ -23,6 +23,15 @@ using namespace FMOD;
 /*num of samples per channel to read for each update.*/
 const int DECODE_BUFFER_SIZE = 1024;
 
+struct AudioSource
+{
+	Sound* source;
+	Sound* pcm;
+	Channel* channel;
+	bool hrtfEnabled = true;
+	const char* sourceID;
+};
+
 class AudioIO
 {
 public:
@@ -44,6 +53,7 @@ public:
 	void StopAudioSource(const char* sourceID);
 	void ToggleAudioSourcePlaying(const char* sourceID);
 	bool IsAudioSourcePlaying(const char* sourceID);
+	void SetAudioSourceHRTF(const char* sourceID, bool enable);
 
 private:
 	/*Singleton modules.*/
@@ -53,8 +63,7 @@ private:
 
 	/*FMOD modules.*/
 	System *system;
-	map<const char*, Channel*> channels;
-	map<const char*, Sound*> audioSources;
+	map<const char*, AudioSource*> audioSources;
 	FMOD_RESULT result;
 	void ErrorHandle();
 

@@ -55,7 +55,7 @@ public:
 	void SetHRTF(HRTFData* data);
 
 	/*Main render function.*/
-	void Render(vector<double>& left, vector<double>& right, bool useHRTF = true);
+	void Render(vector<double>& left, vector<double>& right, const char* sourceID, bool useHRTF = true);
 
 	/*Set position & orientation for audio source and listener. See "export.cpp" for details. */
 	void SetAudioSource(const char* sourceID, vec3f pos);

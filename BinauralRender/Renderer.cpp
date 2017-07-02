@@ -31,14 +31,14 @@ void Renderer::SetHRTF(HRTFData * data)
 	fftw_execute(plan_i);
 }
 
-void Renderer::Render(vector<double>& left, vector<double>& right, bool useHRTF)
+void Renderer::Render(vector<double>& left, vector<double>& right, const char* sourceID, bool useHRTF)
 {
 	if (hrtf == NULL || useHRTF == false)
 	{//leave raw data untouched
 		return;
 	}
 
-	GetAzimuthAndElevation("test");
+	GetAzimuthAndElevation(sourceID);
 	vector<double> leftHRTF, rightHRTF;
 	hrtf->GetHRTF(azimuth, elevation, leftHRTF, rightHRTF);
 	left = Convolve(left, leftHRTF);
