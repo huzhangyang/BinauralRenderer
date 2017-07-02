@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <vector>
+#include <map>
 
 #include <fmod.hpp>
 #include <fmod_errors.h>
@@ -18,6 +19,9 @@
 
 using namespace std;
 using namespace FMOD;
+
+/*num of samples per channel to read for each update.*/
+const int DECODE_BUFFER_SIZE = 1024;
 
 class AudioIO
 {
@@ -32,47 +36,28 @@ public:
 	void Update();
 	void Release();
 
-	/*
-	Basic Playback funtions. Pretty much self-explainatory.
-	OpenOnly: Don't buffer the audio so that readData is to be used.
-	The length and position unit is millisecond.
+	/* Playback functions. See "export.cpp" for details.
 	*/
-	void Open(const char* filename, bool openOnly = false);
-	void Play();
-	void TogglePause();
-	bool IsPlaying();
-	void Stop();
-	unsigned int GetLength();
-	unsigned int GetPosition();
-	void SetPosition(unsigned int position);
+	void AddAudioSource(const char* filename, const char* sourceID);
+	void RemoveAudioSource(const char* sourceID);
+	void PlayAudioSource(const char* sourceID);
+	void StopAudioSource(const char* sourceID);
+	void ToggleAudioSourcePlaying(const char* sourceID);
+	bool IsAudioSourcePlaying(const char* sourceID);
 
-	/*
-	PCM related.
-	*/
-	void InitPCM();
-	void PlayPCM();
 private:
-	/*Singleton*/
+	/*Singleton modules.*/
 	AudioIO() {};
 	static AudioIO* instance;
 	void Init();
 
+	/*FMOD modules.*/
 	System *system;
-	Channel* channel;
-	Sound* sound;
+	map<const char*, Channel*> channels;
+	map<const char*, Sound*> audioSources;
 	FMOD_RESULT result;
 	void ErrorHandle();
 
-	/*
-	PCM related.
-	*/
-	const int DECODE_BUFFER_SIZE = 1024;
-	Channel* channelPCM;
-	Sound* soundPCM;
-	short* currentDataBlock;
-	vector<double> leftChannelData;
-	vector<double> rightChannelData;
-
-	void ReadData(unsigned int length);
+	/*PCM callback for applying HRTF.*/
 	static FMOD_RESULT F_CALLBACK PCMReadCallback(FMOD_SOUND* _sound, void *data, unsigned int datalen);
 };

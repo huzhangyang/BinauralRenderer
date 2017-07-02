@@ -18,11 +18,7 @@ void AudioIO::Init()
 	ErrorHandle();
 
 	result = system->init(512, FMOD_INIT_NORMAL, 0);
-	ErrorHandle();
-
-	leftChannelData.resize(DECODE_BUFFER_SIZE);
-	rightChannelData.resize(DECODE_BUFFER_SIZE);
-	currentDataBlock = (short*)malloc(DECODE_BUFFER_SIZE * 2 * sizeof(short));
+	ErrorHandle();	
 }
 
 void AudioIO::Update()
@@ -32,80 +28,28 @@ void AudioIO::Update()
 
 void AudioIO::Release()
 {
-	sound->release();
-	soundPCM->release();
+	for (const auto& kvp : audioSources)
+	{//release every sound and its source
+		void* source;
+		result = kvp.second->getUserData(&source);
+		ErrorHandle();
+		((Sound*)source)->release();
+		kvp.second->release();
+	}
+	system->close();
 	system->release();
 
-	leftChannelData.clear();
-	rightChannelData.clear();
-	free(currentDataBlock);
+	audioSources.clear();
+	channels.clear();
 }
 
-void AudioIO::Open(const char * filename, bool openOnly)
+void AudioIO::AddAudioSource(const char * filename, const char* sourceID)
 {
-	if(openOnly)
-		result = system->createStream(filename, FMOD_CREATESTREAM | FMOD_OPENONLY, 0, &sound);
-	else
-		result = system->createSound(filename, FMOD_INIT_NORMAL, 0, &sound);
+	Sound *sound, *soundPCM;
+	result = system->createStream(filename, FMOD_CREATESTREAM | FMOD_OPENONLY, 0, &sound);
 	ErrorHandle();
 
-	int numchannels;
-	result = sound->getFormat(0, 0, &numchannels, 0);
-	if (numchannels != 2)
-	{
-		printf("Sorry, only 2-channel stereo audio is supported for now !\n");
-		sound->release();
-	}
-}
-
-void AudioIO::Play()
-{
-	result = system->playSound(sound, 0, false, &channel);
-	ErrorHandle();
-}
-
-void AudioIO::TogglePause()
-{
-	bool x;
-	result = channel->isPlaying(&x);
-	channel->setPaused(!x);
-}
-
-bool AudioIO::IsPlaying()
-{
-	bool x;
-	result = channel->isPlaying(&x);
-	return x;
-}
-
-void AudioIO::Stop()
-{
-	result = channel->stop();
-}
-
-unsigned int AudioIO::GetLength()
-{
-	unsigned int x;
-	result = sound->getLength(&x, FMOD_TIMEUNIT_MS);
-	return x;
-}
-
-unsigned int AudioIO::GetPosition()
-{
-	unsigned int x;
-	result = channel->getPosition(&x, FMOD_TIMEUNIT_MS);
-	return x;
-}
-
-void AudioIO::SetPosition(unsigned int position)
-{
-	result = channel->setPosition(position, FMOD_TIMEUNIT_MS);
-	ErrorHandle();
-}
-
-void AudioIO::InitPCM()
-{
-	assert(sound);
+	//create PCM sound
 	unsigned int pcmLength;
 	int numchannels;
 	float frequency;
@@ -113,6 +57,20 @@ void AudioIO::InitPCM()
 	result = sound->getDefaults(&frequency, 0);
 	result = sound->getFormat(0, &format, &numchannels, 0);
 	result = sound->getLength(&pcmLength, FMOD_TIMEUNIT_PCM);
+
+	if (numchannels != 2)
+	{
+		printf("Sorry, only 2-channel stereo audio is supported for now !\n");
+		sound->release();
+		return;
+	}
+
+	if ((int)frequency != 44100)
+	{
+		printf("Sorry, only 44100Hz sample rate is supported for now !\n");
+		sound->release();
+		return;
+	}
 
 	FMOD_CREATESOUNDEXINFO exinfo = {};
 	exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
@@ -126,14 +84,71 @@ void AudioIO::InitPCM()
 	result = system->createStream(0, FMOD_OPENUSER | FMOD_OPENONLY, &exinfo, &soundPCM);
 	ErrorHandle();
 
-	result = soundPCM->setUserData(this);//pass the class to userData so as to get from callback
+	result = soundPCM->setUserData(sound);//pass audio source to userData so as to get from callback
 	ErrorHandle();
+
+	if (audioSources.count(sourceID) == 1)
+	{
+		void* source;
+		result = audioSources[sourceID]->getUserData(&source);
+		ErrorHandle();
+		((Sound*)source)->release();
+		audioSources[sourceID]->release();
+		audioSources.erase(sourceID);
+	}
+	audioSources.insert(pair<const char*, Sound*>(sourceID, soundPCM));
 }
 
-void AudioIO::PlayPCM()
+void AudioIO::RemoveAudioSource(const char * sourceID)
 {
-	result = system->playSound(soundPCM, 0, false, &channelPCM);
-	ErrorHandle();
+	if (audioSources.count(sourceID) == 1)
+	{
+		void* source;
+		result = audioSources[sourceID]->getUserData(&source);
+		ErrorHandle();
+		((Sound*)source)->release();
+		audioSources[sourceID]->release();
+		audioSources.erase(sourceID);
+	}
+}
+
+void AudioIO::PlayAudioSource(const char * sourceID)
+{
+	if (audioSources.count(sourceID) == 1)
+	{
+		Channel* channel;
+		channels.insert(pair<const char*, Channel*>(sourceID, channel));
+		result = system->playSound(audioSources[sourceID], 0, false, &channels[sourceID]);
+		ErrorHandle();
+	}
+}
+
+void AudioIO::StopAudioSource(const char * sourceID)
+{
+	if (channels.count(sourceID) == 1)
+	{
+		channels[sourceID]->stop();
+	}
+}
+
+void AudioIO::ToggleAudioSourcePlaying(const char * sourceID)
+{
+	if (channels.count(sourceID) == 1)
+	{
+		bool x;
+		result = channels[sourceID]->isPlaying(&x);
+		channels[sourceID]->setPaused(!x);
+	}
+}
+
+bool AudioIO::IsAudioSourcePlaying(const char * sourceID)
+{
+	bool ret = false;
+	if (channels.count(sourceID) == 1)
+	{
+		channels[sourceID]->isPlaying(&ret);
+	}
+	return ret;
 }
 
 void AudioIO::ErrorHandle()
@@ -144,53 +159,56 @@ void AudioIO::ErrorHandle()
 	}
 }
 
-void AudioIO::ReadData(unsigned int size)
+FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, unsigned int datalen)
 {
+	void *userData;
+	Sound* source;
+	FMOD_RESULT result = ((Sound*)_sound)->getUserData(&userData);
+	source = (Sound*) userData;
+	if (result != FMOD_OK || source == NULL)
+	{
+		return FMOD_ERR_INVALID_PARAM;
+	}
+	//read data from source
 	unsigned int actualReadSize;
-	result = sound->readData(&currentDataBlock[0], size, &actualReadSize);
+	short* currentDataBlock = (short*)malloc(DECODE_BUFFER_SIZE * 2 * sizeof(short));
+	result = source->readData(&currentDataBlock[0], datalen, &actualReadSize);
 	if (result != FMOD_OK)
 	{
-		channelPCM->stop();
-		return;
+		//channel->stop();
+		return result;
 	}
-	ErrorHandle();
 
 	//ConvertToDoubleVector
-	leftChannelData.resize(actualReadSize / sizeof(short) / 2);
-	rightChannelData.resize(actualReadSize / sizeof(short) / 2);
-	for (size_t i = 0; i < actualReadSize / sizeof(short); i++)
+	unsigned int actualNumSamples = actualReadSize / sizeof(short) / 2;
+	auto leftChannelData = vector<double>(actualNumSamples);
+	auto rightChannelData = vector<double>(actualNumSamples);
+	unsigned int totalSize = actualNumSamples * 2;
+
+	for (size_t i = 0; i < totalSize; i++)
 	{
 		double value = (double)currentDataBlock[i] / 32768.0;
 		if (value > 1) value = 1.0;
 		if (value < -1) value = -1.0;
 		i % 2 == 0 ? leftChannelData[i / 2] = value : rightChannelData[i / 2] = value;
 	}
-}
 
-FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, unsigned int datalen)
-{
-	void *userData;
-	AudioIO* context;
-	FMOD_RESULT result = ((Sound*)_sound)->getUserData(&userData);
-	context = (AudioIO*) userData;
-	if (result != FMOD_OK || context == NULL)
-	{
-		return FMOD_ERR_INVALID_PARAM;
-	}
-	context->ReadData(datalen);
-
-	Renderer::Instance()->Render(context->leftChannelData, context->rightChannelData);
+	//Rendering
+	Renderer::Instance()->Render(leftChannelData, rightChannelData);
 
 	//ConvertToPCM
 	short* pcm = (short*)data;
-	size_t totalSize = context->leftChannelData.size() + context->rightChannelData.size();
 	for (size_t i = 0; i < totalSize; i++)
 	{
-		short value = i % 2 == 0 ? (short)(context->leftChannelData[i / 2] * 32768) : (short)(context->rightChannelData[i / 2] * 32768);
+		short value = i % 2 == 0 ? (short)(leftChannelData[i / 2] * 32768) : (short)(rightChannelData[i / 2] * 32768);
 		if (value > 32767) value = 32767;
 		if (value < -32768) value = -32768;
 		pcm[i] = value;
 	}
+
+	leftChannelData.clear();
+	rightChannelData.clear();
+	free(currentDataBlock);
 
 	return FMOD_OK;
 }

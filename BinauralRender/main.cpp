@@ -5,16 +5,13 @@
 
 int main()
 {	
-	AudioIO::Instance()->Open("c://test2.mp3", true);
-	AudioIO::Instance()->InitPCM();
-
+	AudioIO::Instance()->AddAudioSource("c://test2.mp3", "test");
 
 	HRIRData *hrir = DataIO::OpenMat("c://test.mat");
 	HRTFData *hrtf = DataIO::ConvertToHRTF(hrir);
-
 	Renderer::Instance()->SetHRTF(hrtf);
 
-	AudioIO::Instance()->PlayPCM();
+	AudioIO::Instance()->PlayAudioSource("test");
 
 	while (true)
 	{
@@ -22,6 +19,8 @@ int main()
 		AudioIO::Instance()->Update();
 		Sleep(1000 / 60);
 	}
+
+	AudioIO::Instance()->Release();
 
 	return 0;
 }
