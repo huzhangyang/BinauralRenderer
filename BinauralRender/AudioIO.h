@@ -21,12 +21,13 @@ using namespace std;
 using namespace FMOD;
 
 /*num of samples per channel to read for each update.*/
-const int DECODE_BUFFER_SIZE = 1024;
+const int DECODE_BUFFER_SIZE = 1024;//FMOD use 1024 by default so no need to explicit set
 
 struct AudioSource
 {
-	Sound* source;
+	Sound* sound;
 	Channel* channel;
+	DSP* dsp;
 	bool hrtfEnabled = true;
 	vec3f pos = vec3f(0, 0, 0);
 };
@@ -64,7 +65,6 @@ private:
 
 	/*FMOD modules.*/
 	System *system;
-	DSP *dsp;
 	map<const char*, AudioSource*> audioSources;
 	FMOD_RESULT result;
 	void ErrorHandle();

@@ -14,7 +14,7 @@ int main()
 	Renderer::Instance()->SetListener(vec3f(0, 0, 0), vec3f(0, 0, 0));
 	AudioIO::Instance()->SetAudioSourcePos(id, vec3f(0, 0, 0));
 
-	//AudioIO::Instance()->OutputToWAV(id, "test.wav");
+	//AudioIO::Instance()->OutputToWAV("c://test.mp3", "test.wav");
 	AudioIO::Instance()->PlayAudioSource(id);
 
 	while (true)

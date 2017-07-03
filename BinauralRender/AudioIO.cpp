@@ -19,16 +19,6 @@ void AudioIO::Init()
 
 	result = system->init(512, FMOD_INIT_NORMAL, 0);
 	ErrorHandle();	
-
-	FMOD_DSP_DESCRIPTION dspdesc = {};
-	strcpy_s(dspdesc.name, "HRTF unit");
-	dspdesc.version = 1;
-	dspdesc.numinputbuffers = 1;
-	dspdesc.numoutputbuffers = 1;
-	dspdesc.read = DSPReadCallback;
-
-	result = system->createDSP(&dspdesc, &dsp);
-	ErrorHandle();
 }
 
 void AudioIO::Update()
@@ -41,7 +31,8 @@ void AudioIO::Release()
 	for (const auto& kvp : audioSources)
 	{//release every AudioSource
 		AudioSource* as = kvp.second;
-		as->source->release();
+		as->sound->release();
+		as->dsp->release();
 	}
 	system->close();
 	system->release();
@@ -78,8 +69,22 @@ void AudioIO::AddAudioSource(const char * filename, const char* sourceID)
 		return;
 	}
 
+	FMOD_DSP_DESCRIPTION dspdesc = {};
+	strcpy_s(dspdesc.name, "HRTF unit");
+	dspdesc.version = 1;
+	dspdesc.numinputbuffers = 1;
+	dspdesc.numoutputbuffers = 1;
+	dspdesc.read = DSPReadCallback;
+
+	DSP *dsp;
+	result = system->createDSP(&dspdesc, &dsp);
+	ErrorHandle();	
+
 	AudioSource* as = new AudioSource();
-	as->source = sound;
+	as->sound = sound;
+	as->dsp = dsp;
+	dsp->setUserData(as);//pass audiosource to userdata so as to be accessed from the callback
+
 	RemoveAudioSource(sourceID);//if duplicate
 	audioSources.insert(pair<const char*, AudioSource*>(sourceID, as));
 }
@@ -88,8 +93,8 @@ void AudioIO::RemoveAudioSource(const char * sourceID)
 {
 	if (audioSources.count(sourceID) == 1)
 	{
-		AudioSource* _as = audioSources[sourceID];
-		_as->source->release();
+		audioSources[sourceID]->sound->release();
+		audioSources[sourceID]->dsp->release();
 		audioSources.erase(sourceID);
 	}
 }
@@ -98,8 +103,9 @@ void AudioIO::PlayAudioSource(const char * sourceID)
 {
 	if (audioSources.count(sourceID) == 1)
 	{
-		result = system->playSound(audioSources[sourceID]->source, 0, false, &audioSources[sourceID]->channel);
-		audioSources[sourceID]->channel->addDSP(0, dsp);
+		result = system->playSound(audioSources[sourceID]->sound, 0, false, &audioSources[sourceID]->channel);
+		ErrorHandle();
+		result = audioSources[sourceID]->channel->addDSP(0, audioSources[sourceID]->dsp);
 		ErrorHandle();
 	}
 }
@@ -149,7 +155,7 @@ void AudioIO::SetAudioSourcePos(const char * sourceID, vec3f pos)
 	}
 }
 
-void AudioIO::OutputToWAV(const char * sourceID, const char * output)
+void AudioIO::OutputToWAV(const char * input, const char * output)
 {
 	System *systemNRT;
 	result = FMOD::System_Create(&systemNRT);
@@ -159,14 +165,43 @@ void AudioIO::OutputToWAV(const char * sourceID, const char * output)
 	result = systemNRT->init(1, FMOD_INIT_STREAM_FROM_UPDATE, (void*)output);
 	ErrorHandle();
 
+	Sound *sound;
+	result = systemNRT->createStream(input, FMOD_CREATESTREAM | FMOD_OPENONLY, 0, &sound);
+	ErrorHandle();
+
+	FMOD_DSP_DESCRIPTION dspdesc = {};
+	strcpy_s(dspdesc.name, "HRTF unit");
+	dspdesc.version = 1;
+	dspdesc.numinputbuffers = 1;
+	dspdesc.numoutputbuffers = 1;
+	dspdesc.read = DSPReadCallback;
+
+	DSP *dsp;
+	result = system->createDSP(&dspdesc, &dsp);
+	ErrorHandle();
+
+	AudioSource* as = new AudioSource();
+	as->sound = sound;
+	as->dsp = dsp;
+	dsp->setUserData(as);//pass audiosource to userdata so as to be accessed from the callback
+
 	printf("Outputing to %s, it might take a few minutes. Please wait.\n", output);
-	
-	systemNRT->playSound(audioSources[sourceID]->source, 0, false, &audioSources[sourceID]->channel);
-	while (IsAudioSourcePlaying(sourceID))
+
+	result = system->playSound(as->sound, 0, false, &as->channel);
+	result = as->channel->addDSP(0, as->dsp);
+
+	bool playing = true;
+	unsigned int process;
+	while (playing)
 	{
+		as->channel->isPlaying(&playing);
+		as->channel->getPosition(&process, FMOD_TIMEUNIT_PCM);
+		printf("%d\n", process);
 		systemNRT->update();
 	}
 
+	sound->release();
+	dsp->release();
 	systemNRT->close();
 	systemNRT->release();
 	printf("Outputing Complete.");
@@ -182,10 +217,15 @@ void AudioIO::ErrorHandle()
 
 FMOD_RESULT F_CALLBACK AudioIO::DSPReadCallback(FMOD_DSP_STATE *dsp_state, float *inbuffer, float *outbuffer, unsigned int length, int inchannels, int *outchannels)
 {
+	assert(inchannels == 2 && *outchannels == 2);
+
+	void * data;
+	((DSP*)dsp_state->instance)->getUserData(&data);
+	AudioSource *as = (AudioSource*)data;
+	assert(as);
+
 	auto leftChannelData = vector<double>(length);
 	auto rightChannelData = vector<double>(length);
-
-	assert(inchannels == 2 && *outchannels == 2);
 
 	for (unsigned int samp = 0; samp < length; samp++)
 	{
@@ -193,7 +233,10 @@ FMOD_RESULT F_CALLBACK AudioIO::DSPReadCallback(FMOD_DSP_STATE *dsp_state, float
 		rightChannelData[samp] = (double)inbuffer[samp * inchannels + 1];
 	}
 
-	Renderer::Instance()->Render(leftChannelData, rightChannelData, vec3f(0, 0, 0), true);
+	if (as->hrtfEnabled)
+	{
+		Renderer::Instance()->Render(leftChannelData, rightChannelData, as->pos);
+	}
 
 	for (unsigned int samp = 0; samp < length; samp++)
 	{

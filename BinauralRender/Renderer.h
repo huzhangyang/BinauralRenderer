@@ -55,7 +55,7 @@ public:
 	void SetHRTF(HRTFData* data);
 
 	/*Main render function.*/
-	void Render(vector<double>& left, vector<double>& right, vec3f pos, bool useHRTF = true);
+	void Render(vector<double>& left, vector<double>& right, vec3f pos);
 
 	/*Set position & orientation for listener. See "export.cpp" for details. */
 	void SetListener(vec3f pos, vec3f ori);

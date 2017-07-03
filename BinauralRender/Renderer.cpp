@@ -31,9 +31,9 @@ void Renderer::SetHRTF(HRTFData * data)
 	fftw_execute(plan_i);
 }
 
-void Renderer::Render(vector<double>& left, vector<double>& right, vec3f pos, bool useHRTF)
+void Renderer::Render(vector<double>& left, vector<double>& right, vec3f pos)
 {
-	if (hrtf == NULL || useHRTF == false)
+	if (hrtf == NULL)
 	{//leave raw data untouched
 		return;
 	}
