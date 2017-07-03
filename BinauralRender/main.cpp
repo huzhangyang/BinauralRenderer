@@ -12,10 +12,11 @@ int main()
 	HRTFData *hrtf = DataIO::ConvertToHRTF(hrir);
 	Renderer::Instance()->SetHRTF(hrtf);
 	Renderer::Instance()->SetListener(vec3f(0, 0, 0), vec3f(0, 0, 0));
-	AudioIO::Instance()->SetAudioSourcePos(id, vec3f(0, 0, 0));
+	AudioIO::Instance()->SetAudioSourcePos(id, vec3f(3, 3, 3));
 
 	//AudioIO::Instance()->OutputToWAV("c://test.mp3", "test.wav");
 	AudioIO::Instance()->PlayAudioSource(id);
+	//AudioIO::Instance()->SetAudioSourceHRTF(id, false);
 
 	while (true)
 	{

@@ -28,7 +28,6 @@ struct AudioSource
 	Sound* sound;
 	Channel* channel;
 	DSP* dsp;
-	bool hrtfEnabled = true;
 	vec3f pos = vec3f(0, 0, 0);
 };
 
@@ -56,6 +55,8 @@ public:
 	void SetAudioSourceHRTF(const char* sourceID, bool enable);
 	void SetAudioSourcePos(const char* sourceID, vec3f pos);
 
+	/* Output filtered audio to a .wav file. Experimental.
+	*/
 	void OutputToWAV(const char* sourceID, const char* output);
 private:
 	/*Singleton modules.*/

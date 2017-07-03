@@ -142,7 +142,7 @@ void AudioIO::SetAudioSourceHRTF(const char * sourceID, bool enable)
 {
 	if (audioSources.count(sourceID) == 1)
 	{
-		audioSources[sourceID]->hrtfEnabled = enable;
+		audioSources[sourceID]->dsp->setBypass(!enable);
 	}
 }
 
@@ -233,10 +233,7 @@ FMOD_RESULT F_CALLBACK AudioIO::DSPReadCallback(FMOD_DSP_STATE *dsp_state, float
 		rightChannelData[samp] = (double)inbuffer[samp * inchannels + 1];
 	}
 
-	if (as->hrtfEnabled)
-	{
-		Renderer::Instance()->Render(leftChannelData, rightChannelData, as->pos);
-	}
+	Renderer::Instance()->Render(leftChannelData, rightChannelData, as->pos);
 
 	for (unsigned int samp = 0; samp < length; samp++)
 	{
