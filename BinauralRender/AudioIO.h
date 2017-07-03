@@ -26,10 +26,9 @@ const int DECODE_BUFFER_SIZE = 1024;
 struct AudioSource
 {
 	Sound* source;
-	Sound* pcm;
 	Channel* channel;
 	bool hrtfEnabled = true;
-	const char* sourceID;
+	vec3f pos = vec3f(0, 0, 0);
 };
 
 class AudioIO
@@ -54,6 +53,7 @@ public:
 	void ToggleAudioSourcePlaying(const char* sourceID);
 	bool IsAudioSourcePlaying(const char* sourceID);
 	void SetAudioSourceHRTF(const char* sourceID, bool enable);
+	void SetAudioSourcePos(const char* sourceID, vec3f pos);
 
 	void OutputToWAV(const char* sourceID, const char* output);
 private:
@@ -64,10 +64,11 @@ private:
 
 	/*FMOD modules.*/
 	System *system;
+	DSP *dsp;
 	map<const char*, AudioSource*> audioSources;
 	FMOD_RESULT result;
 	void ErrorHandle();
 
-	/*PCM callback for applying HRTF.*/
-	static FMOD_RESULT F_CALLBACK PCMReadCallback(FMOD_SOUND* _sound, void *data, unsigned int datalen);
+	/*DSPRead callback for applying HRTF.*/
+	static FMOD_RESULT F_CALLBACK DSPReadCallback(FMOD_DSP_STATE *dsp_state, float *inbuffer, float *outbuffer, unsigned int length, int inchannels, int *outchannels);
 };

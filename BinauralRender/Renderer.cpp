@@ -31,23 +31,18 @@ void Renderer::SetHRTF(HRTFData * data)
 	fftw_execute(plan_i);
 }
 
-void Renderer::Render(vector<double>& left, vector<double>& right, const char* sourceID, bool useHRTF)
+void Renderer::Render(vector<double>& left, vector<double>& right, vec3f pos, bool useHRTF)
 {
 	if (hrtf == NULL || useHRTF == false)
 	{//leave raw data untouched
 		return;
 	}
 
-	GetAzimuthAndElevation(sourceID);
+	GetAzimuthAndElevation(pos);
 	vector<double> leftHRTF, rightHRTF;
 	hrtf->GetHRTF(azimuth, elevation, leftHRTF, rightHRTF);
 	left = Convolve(left, leftHRTF);
 	right = Convolve(right, rightHRTF);
-}
-
-void Renderer::SetAudioSource(const char * sourceID, vec3f pos)
-{
-	sourcePos[sourceID] = pos;
 }
 
 void Renderer::SetListener(vec3f pos, vec3f ori)
@@ -56,13 +51,12 @@ void Renderer::SetListener(vec3f pos, vec3f ori)
 	listenerOri = ori;
 }
 
-void Renderer::GetAzimuthAndElevation(const char* sourceID)
+void Renderer::GetAzimuthAndElevation(vec3f sourcePos)
 {
-	auto source = sourcePos[sourceID];
 	//azimuth = arctan(y / x)
-	float deltaX = source.x - listenerPos.x;
-	float deltaY = source.y - listenerPos.y;
-	float deltaZ = source.z - listenerPos.z;
+	float deltaX = sourcePos.x - listenerPos.x;
+	float deltaY = sourcePos.y - listenerPos.y;
+	float deltaZ = sourcePos.z - listenerPos.z;
 	if (deltaX == 0 && deltaY == 0)
 		azimuth = 0;
 	else
@@ -78,12 +72,12 @@ void Renderer::GetAzimuthAndElevation(const char* sourceID)
 	if (azimuth > 90)
 	{
 		azimuth = 180 - azimuth;
-		elevation = elevation < 0 ? 360 + elevation : 180 - elevation;
+		elevation = elevation < 0 ? 180 + elevation : 180 - elevation;
 	}
 	else if (azimuth < -90)
 	{
 		azimuth = -180 - azimuth;
-		elevation = elevation < 0 ? 360 + elevation : 180 - elevation;
+		elevation = elevation < 0 ? 180 + elevation : 180 - elevation;
 	}
 	//printf("azimuth: %f, elevation: %f\n", azimuth, elevation);
 }

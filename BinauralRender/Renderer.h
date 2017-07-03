@@ -55,10 +55,9 @@ public:
 	void SetHRTF(HRTFData* data);
 
 	/*Main render function.*/
-	void Render(vector<double>& left, vector<double>& right, const char* sourceID, bool useHRTF = true);
+	void Render(vector<double>& left, vector<double>& right, vec3f pos, bool useHRTF = true);
 
-	/*Set position & orientation for audio source and listener. See "export.cpp" for details. */
-	void SetAudioSource(const char* sourceID, vec3f pos);
+	/*Set position & orientation for listener. See "export.cpp" for details. */
 	void SetListener(vec3f pos, vec3f ori);
 private:
 	/*Singleton modules.*/
@@ -66,7 +65,7 @@ private:
 	static Renderer* instance;
 
 	/*Private functions.*/
-	void GetAzimuthAndElevation(const char* sourceID);
+	void GetAzimuthAndElevation(vec3f sourcePos);
 	vector<double> Convolve(vector<double> signal, vector<double> filter);
 
 	/*Used for HRTF.*/

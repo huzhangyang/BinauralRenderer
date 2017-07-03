@@ -77,6 +77,16 @@ extern "C"
 	}
 
 	/*
+	Set the position of an audio source so that it's properly used in the renderer.
+	sourceID: An custom ID used to uniquely identify the source object.
+	posx, posy, posz: the position in x,y,z axis of the audio source.
+	*/
+	__declspec(dllexport) void SetAudioSourcePos(const char* sourceID, float posx, float posy, float posz)
+	{
+		AudioIO::Instance()->SetAudioSourcePos(sourceID, vec3f(posx, posy, posz));
+	}
+
+	/*
 	Update the audio engine. The audio playback is driven by the update function.
 	Should be called with the update function in the game engine.
 	*/
@@ -104,16 +114,6 @@ extern "C"
 		HRIRData *hrir = DataIO::OpenMat(filename);
 		HRTFData *hrtf = DataIO::ConvertToHRTF(hrir);
 		Renderer::Instance()->SetHRTF(hrtf);
-	}
-
-	/*
-	Set the position of an audio source so that it's properly used in the renderer.
-	sourceID: An custom ID used to uniquely identify the source object.
-	posx, posy, posz: the position in x,y,z axis of the audio source.
-	*/
-	__declspec(dllexport) void SetAudioSource(const char* sourceID, float posx, float posy, float posz)
-	{
-		Renderer::Instance()->SetAudioSource(sourceID, vec3f(posx, posy, posz));
 	}
 
 	/*

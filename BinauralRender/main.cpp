@@ -11,10 +11,10 @@ int main()
 	HRIRData *hrir = DataIO::OpenMat("c://test.mat");
 	HRTFData *hrtf = DataIO::ConvertToHRTF(hrir);
 	Renderer::Instance()->SetHRTF(hrtf);
-	Renderer::Instance()->SetAudioSource(id, vec3f(0, 0, 0));
 	Renderer::Instance()->SetListener(vec3f(0, 0, 0), vec3f(0, 0, 0));
+	AudioIO::Instance()->SetAudioSourcePos(id, vec3f(0, 0, 0));
 
-	AudioIO::Instance()->OutputToWAV(id, "test.wav");
+	//AudioIO::Instance()->OutputToWAV(id, "test.wav");
 	AudioIO::Instance()->PlayAudioSource(id);
 
 	while (true)

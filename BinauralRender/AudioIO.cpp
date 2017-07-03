@@ -19,6 +19,16 @@ void AudioIO::Init()
 
 	result = system->init(512, FMOD_INIT_NORMAL, 0);
 	ErrorHandle();	
+
+	FMOD_DSP_DESCRIPTION dspdesc = {};
+	strcpy_s(dspdesc.name, "HRTF unit");
+	dspdesc.version = 1;
+	dspdesc.numinputbuffers = 1;
+	dspdesc.numoutputbuffers = 1;
+	dspdesc.read = DSPReadCallback;
+
+	result = system->createDSP(&dspdesc, &dsp);
+	ErrorHandle();
 }
 
 void AudioIO::Update()
@@ -32,7 +42,6 @@ void AudioIO::Release()
 	{//release every AudioSource
 		AudioSource* as = kvp.second;
 		as->source->release();
-		as->pcm->release();
 	}
 	system->close();
 	system->release();
@@ -42,7 +51,7 @@ void AudioIO::Release()
 
 void AudioIO::AddAudioSource(const char * filename, const char* sourceID)
 {
-	Sound *sound, *soundPCM;
+	Sound *sound;
 	result = system->createStream(filename, FMOD_CREATESTREAM | FMOD_OPENONLY, 0, &sound);
 	ErrorHandle();
 
@@ -69,33 +78,9 @@ void AudioIO::AddAudioSource(const char * filename, const char* sourceID)
 		return;
 	}
 
-	FMOD_CREATESOUNDEXINFO exinfo = {};
-	exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
-	exinfo.numchannels = numchannels;
-	exinfo.defaultfrequency = (int)frequency;
-	exinfo.decodebuffersize = DECODE_BUFFER_SIZE;
-	exinfo.length = exinfo.defaultfrequency * exinfo.numchannels * sizeof(short) * pcmLength / 1000;
-	exinfo.format = format;
-	exinfo.pcmreadcallback = this->PCMReadCallback;
-
-	result = system->createStream(0, FMOD_OPENUSER | FMOD_OPENONLY, &exinfo, &soundPCM);
-	ErrorHandle();
-
 	AudioSource* as = new AudioSource();
 	as->source = sound;
-	as->pcm = soundPCM;
-	as->sourceID = sourceID;
-
-	result = soundPCM->setUserData(as);//pass audio source to userData so as to get from callback
-	ErrorHandle();
-
-	if (audioSources.count(sourceID) == 1)
-	{
-		AudioSource* _as = audioSources[sourceID];
-		_as->source->release();
-		_as->pcm->release();
-		audioSources.erase(sourceID);
-	}
+	RemoveAudioSource(sourceID);//if duplicate
 	audioSources.insert(pair<const char*, AudioSource*>(sourceID, as));
 }
 
@@ -105,7 +90,6 @@ void AudioIO::RemoveAudioSource(const char * sourceID)
 	{
 		AudioSource* _as = audioSources[sourceID];
 		_as->source->release();
-		_as->pcm->release();
 		audioSources.erase(sourceID);
 	}
 }
@@ -114,7 +98,8 @@ void AudioIO::PlayAudioSource(const char * sourceID)
 {
 	if (audioSources.count(sourceID) == 1)
 	{
-		result = system->playSound(audioSources[sourceID]->pcm, 0, false, &audioSources[sourceID]->channel);
+		result = system->playSound(audioSources[sourceID]->source, 0, false, &audioSources[sourceID]->channel);
+		audioSources[sourceID]->channel->addDSP(0, dsp);
 		ErrorHandle();
 	}
 }
@@ -155,6 +140,15 @@ void AudioIO::SetAudioSourceHRTF(const char * sourceID, bool enable)
 	}
 }
 
+void AudioIO::SetAudioSourcePos(const char * sourceID, vec3f pos)
+{
+
+	if (audioSources.count(sourceID) == 1)
+	{
+		audioSources[sourceID]->pos = pos;
+	}
+}
+
 void AudioIO::OutputToWAV(const char * sourceID, const char * output)
 {
 	System *systemNRT;
@@ -166,7 +160,8 @@ void AudioIO::OutputToWAV(const char * sourceID, const char * output)
 	ErrorHandle();
 
 	printf("Outputing to %s, it might take a few minutes. Please wait.\n", output);
-	systemNRT->playSound(audioSources[sourceID]->pcm, 0, false, &audioSources[sourceID]->channel);
+	
+	systemNRT->playSound(audioSources[sourceID]->source, 0, false, &audioSources[sourceID]->channel);
 	while (IsAudioSourcePlaying(sourceID))
 	{
 		systemNRT->update();
@@ -185,56 +180,29 @@ void AudioIO::ErrorHandle()
 	}
 }
 
-FMOD_RESULT F_CALLBACK AudioIO::PCMReadCallback(FMOD_SOUND* _sound, void *data, unsigned int datalen)
+FMOD_RESULT F_CALLBACK AudioIO::DSPReadCallback(FMOD_DSP_STATE *dsp_state, float *inbuffer, float *outbuffer, unsigned int length, int inchannels, int *outchannels)
 {
-	void *userData;
-	AudioSource* as;
-	FMOD_RESULT result = ((Sound*)_sound)->getUserData(&userData);
-	as = (AudioSource*) userData;
-	if (result != FMOD_OK || as == NULL)
+	auto leftChannelData = vector<double>(length);
+	auto rightChannelData = vector<double>(length);
+
+	assert(inchannels == 2 && *outchannels == 2);
+
+	for (unsigned int samp = 0; samp < length; samp++)
 	{
-		return FMOD_ERR_INVALID_PARAM;
-	}
-	//read data from source
-	unsigned int actualReadSize;
-	short* currentDataBlock = (short*)malloc(DECODE_BUFFER_SIZE * 2 * sizeof(short));
-	result = as->source->readData(&currentDataBlock[0], datalen, &actualReadSize);
-	if (result != FMOD_OK)
-	{
-		as->channel->stop();
-		return result;
+		leftChannelData[samp] = (double)inbuffer[samp * inchannels + 0];
+		rightChannelData[samp] = (double)inbuffer[samp * inchannels + 1];
 	}
 
-	//ConvertToDoubleVector
-	unsigned int actualNumSamples = actualReadSize / sizeof(short) / 2;
-	auto leftChannelData = vector<double>(actualNumSamples);
-	auto rightChannelData = vector<double>(actualNumSamples);
-	unsigned int totalSize = actualNumSamples * 2;
+	Renderer::Instance()->Render(leftChannelData, rightChannelData, vec3f(0, 0, 0), true);
 
-	for (size_t i = 0; i < totalSize; i++)
+	for (unsigned int samp = 0; samp < length; samp++)
 	{
-		double value = (double)currentDataBlock[i] / 32768.0;
-		if (value > 1) value = 1.0;
-		if (value < -1) value = -1.0;
-		i % 2 == 0 ? leftChannelData[i / 2] = value : rightChannelData[i / 2] = value;
-	}
-
-	//Rendering
-	Renderer::Instance()->Render(leftChannelData, rightChannelData, as->sourceID, as->hrtfEnabled);
-
-	//ConvertToPCM
-	short* pcm = (short*)data;
-	for (size_t i = 0; i < totalSize; i++)
-	{
-		short value = i % 2 == 0 ? (short)(leftChannelData[i / 2] * 32768) : (short)(rightChannelData[i / 2] * 32768);
-		if (value > 32767) value = 32767;
-		if (value < -32768) value = -32768;
-		pcm[i] = value;
+		outbuffer[(samp * inchannels) + 0] = (float)leftChannelData[samp];
+		outbuffer[(samp * inchannels) + 1] = (float)rightChannelData[samp];
 	}
 
 	leftChannelData.clear();
 	rightChannelData.clear();
-	free(currentDataBlock);
 
 	return FMOD_OK;
 }
