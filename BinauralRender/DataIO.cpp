@@ -21,7 +21,7 @@ HRIRData* DataIO::OpenMat(const char* filename)
 		mxGetString(matArray, data->name, mxGetN(matArray) + 1);
 		printf("Load data of %s\n", data->name);
 	}
-
+	mxDestroyArray(matArray);
 	matArray = matGetVariable(mat, "OnL");
 	if (matArray != NULL)
 	{
@@ -32,6 +32,7 @@ HRIRData* DataIO::OpenMat(const char* filename)
 			for (int j = 0; j < N; j++)
 				data->OnL[i][j] = matData[M*j + i];
 	}
+	mxDestroyArray(matArray);
 	matArray = matGetVariable(mat, "OnR");
 	if (matArray != NULL)
 	{
@@ -42,6 +43,7 @@ HRIRData* DataIO::OpenMat(const char* filename)
 			for (int j = 0; j < N; j++)
 				data->OnR[i][j] = matData[M*j + i];
 	}
+	mxDestroyArray(matArray);
 	matArray = matGetVariable(mat, "ITD");
 	if (matArray != NULL)
 	{
@@ -52,6 +54,7 @@ HRIRData* DataIO::OpenMat(const char* filename)
 			for (int j = 0; j < N; j++)
 				data->ITD[i][j] = matData[M*j + i];
 	}
+	mxDestroyArray(matArray);
 	matArray = matGetVariable(mat, "hrir_l");
 	if (matArray != NULL)
 	{
@@ -62,6 +65,7 @@ HRIRData* DataIO::OpenMat(const char* filename)
 				for (int k = 0; k < dimension[2]; k++)
 					data->hrir_l[i][j][k] = matData[dimension[0] * (j + dimension[1] * k) + i];
 	}
+	mxDestroyArray(matArray);
 	matArray = matGetVariable(mat, "hrir_r");
 	if (matArray != NULL)
 	{

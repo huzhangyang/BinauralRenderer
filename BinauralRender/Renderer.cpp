@@ -138,5 +138,7 @@ void Renderer::Release()
 	fftw_destroy_plan(plan_i);
 	output.clear();
 	sourcePos.clear();
+
+	delete(hrtf);
 	instance = NULL;
 }

@@ -114,6 +114,7 @@ extern "C"
 		HRIRData *hrir = DataIO::OpenMat(filename);
 		HRTFData *hrtf = DataIO::ConvertToHRTF(hrir);
 		Renderer::Instance()->SetHRTF(hrtf);
+		delete(hrir);
 	}
 
 	/*
