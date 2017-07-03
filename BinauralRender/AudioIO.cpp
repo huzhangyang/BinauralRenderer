@@ -38,6 +38,7 @@ void AudioIO::Release()
 	system->release();
 
 	audioSources.clear();
+	instance = NULL;
 }
 
 void AudioIO::AddAudioSource(const char * filename, const char* sourceID)
