@@ -113,7 +113,7 @@ vector<double> Renderer::Convolve(vector<double> _signal, vector<double> _filter
 	output.resize(_signal.size());
 	for (int i = 0; i < output.size(); i++)
 	{
-		output[i] = result[100 + i] / segmentLength;
+		output[i] = result[HRIR_LENGTH / 2 + i] / segmentLength;
 	}
 
 	return output;
