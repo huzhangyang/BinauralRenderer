@@ -84,7 +84,39 @@ void Renderer::GetAzimuthAndElevation(vec3f sourcePos)
 
 vector<double> Renderer::Convolve(vector<double> _signal, vector<double> _filter)
 {
-	return _signal;
+	//zero-pad signal
+	int signalSize = (int)_signal.size();
+	for (size_t i = 0; i < signalSize; i++)
+	{
+		signal[i] = _signal[i];
+	}
+	for (size_t i = signalSize; i < segmentLength; i++)
+	{
+		signal[i] = 0;
+	}
+	filter = &_filter[0];
+
+	//fft signal
+	fftw_execute(plan_f);
+	//Multiply the FFTs		
+	result[0] = signal[0] * filter[0];
+	result[segmentLength / 2] = signal[segmentLength / 2] * filter[segmentLength / 2];
+	for (int j = 1; j < segmentLength / 2; j++)
+	{
+		int k = segmentLength - j;
+		result[j] = signal[j] * filter[j] - signal[k] * filter[k];
+		result[k] = signal[j] * filter[k] + signal[k] * filter[j];
+	}
+	//IFFT
+	fftw_execute(plan_i);
+	//OUTPUT
+	output.resize(_signal.size());
+	for (int i = 0; i < output.size(); i++)
+	{
+		output[i] = result[100 + i] / segmentLength;
+	}
+
+	return output;
 }
 
 vector<double> Renderer::Convolve2(vector<double> _signal, vector<double> _filter)
