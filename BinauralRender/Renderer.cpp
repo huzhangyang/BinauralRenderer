@@ -41,8 +41,8 @@ void Renderer::Render(vector<double>& left, vector<double>& right, vec3f pos)
 	GetAzimuthAndElevation(pos);
 	vector<double> leftHRTF, rightHRTF;
 	hrtf->GetHRTF(azimuth, elevation, leftHRTF, rightHRTF);
-	left = Convolve(left, leftHRTF);
-	right = Convolve(right, rightHRTF);
+	left = Convolve2(left, leftHRTF);
+	right = Convolve2(right, rightHRTF);
 }
 
 void Renderer::SetListener(vec3f pos, vec3f ori)
@@ -84,6 +84,11 @@ void Renderer::GetAzimuthAndElevation(vec3f sourcePos)
 
 vector<double> Renderer::Convolve(vector<double> _signal, vector<double> _filter)
 {
+	return _signal;
+}
+
+vector<double> Renderer::Convolve2(vector<double> _signal, vector<double> _filter)
+{
 	int signalSize = (int)_signal.size();
 	int segmentNum = signalSize * 2 / segmentLength;
 	int signalLength = segmentLength / 2;
@@ -106,13 +111,13 @@ vector<double> Renderer::Convolve(vector<double> _signal, vector<double> _filter
 		//Multiply the FFTs		
 		result[0] = signal[0] * filter[0];
 		result[signalLength] = signal[signalLength] * filter[signalLength];
-		for (int j = 1; j < segmentLength / 2; j++)
+		for (int j = 1; j < signalLength; j++)
 		{
 			int k = segmentLength - j;
 			result[j] = signal[j] * filter[j] - signal[k] * filter[k];
 			result[k] = signal[j] * filter[k] + signal[k] * filter[j];
 		}
-		//IFFT
+		//ifft
 		fftw_execute(plan_i);
 		//overlap-add
 		for (int j = 0; j < signalLength; j++)
@@ -126,6 +131,11 @@ vector<double> Renderer::Convolve(vector<double> _signal, vector<double> _filter
 	}
 
 	return output;
+}
+
+vector<double> Renderer::Convolve3(vector<double> _signal, vector<double> _filter)
+{
+	return _signal;
 }
 
 void Renderer::Release()

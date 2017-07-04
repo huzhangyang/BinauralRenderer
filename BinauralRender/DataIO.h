@@ -52,7 +52,7 @@ public:
 	@param azimuth: azimuth angle in degree. [-90, 90]
 	@param elevation: elevation angle in degree. [-90, 270]
 	@param nearest: if no specific hrtf data found given azimuth and elevation, use hrtf of nearest location.
-	@return HRTF data of length SEGMENT_LENGTH.
+	@return corresponding HRTF data.
 	*/
 	vector<double> GetLeftHRTF(float azimuth, float elevation, bool nearest = true);
 	vector<double> GetRightHRTF(float azimuth, float elevation, bool nearest = true);

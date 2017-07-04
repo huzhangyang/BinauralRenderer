@@ -66,7 +66,9 @@ private:
 
 	/*Private functions.*/
 	void GetAzimuthAndElevation(vec3f sourcePos);
-	vector<double> Convolve(vector<double> signal, vector<double> filter);
+	vector<double> Convolve(vector<double> _signal, vector<double> _filter);//direct frequency multiplication
+	vector<double> Convolve2(vector<double> _signal, vector<double> _filter);//overlap add
+	vector<double> Convolve3(vector<double> _signal, vector<double> _filter);//overlap save
 
 	/*Used for HRTF.*/
 	vec3f listenerPos;

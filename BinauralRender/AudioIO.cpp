@@ -178,7 +178,7 @@ void AudioIO::OutputToWAV(const char * input, const char * output)
 	dspdesc.read = DSPReadCallback;
 
 	DSP *dsp;
-	result = system->createDSP(&dspdesc, &dsp);
+	result = systemNRT->createDSP(&dspdesc, &dsp);
 	ErrorHandle();
 
 	AudioSource* as = new AudioSource();
@@ -188,7 +188,7 @@ void AudioIO::OutputToWAV(const char * input, const char * output)
 
 	printf("Outputing to %s, it might take a few minutes. Please wait.\n", output);
 
-	result = system->playSound(as->sound, 0, false, &as->channel);
+	result = systemNRT->playSound(as->sound, 0, false, &as->channel);
 	result = as->channel->addDSP(0, as->dsp);
 
 	bool playing = true;
