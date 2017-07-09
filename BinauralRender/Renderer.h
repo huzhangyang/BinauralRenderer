@@ -66,9 +66,9 @@ private:
 
 	/*Private functions.*/
 	void GetAzimuthAndElevation(vec3f sourcePos);
-	vector<double> Convolve(vector<double> _signal, vector<double> _filter);//direct frequency multiplication
-	vector<double> Convolve2(vector<double> _signal, vector<double> _filter);//overlap add
-	vector<double> Convolve3(vector<double> _signal, vector<double> _filter);//overlap save
+	vector<double> Convolve(vector<double> _signal, vector<double> _filter);//direct frequency multiplication segmentLength. fftSize = 2048
+	vector<double> Convolve2(vector<double> _signal, vector<double> _filter);//overlap add. fftSize = 256
+	vector<double> Convolve3(vector<double> _signal, vector<double> _filter);//overlap save. fftSize = 512
 
 	/*Used for HRTF.*/
 	vec3f listenerPos;
@@ -78,7 +78,7 @@ private:
 	HRTFData* hrtf;
 
 	/*Used in convolution.*/
-	int segmentLength;
+	int fftSize;
 	double* buffer;
 	double* signal;
 	double* filter;
