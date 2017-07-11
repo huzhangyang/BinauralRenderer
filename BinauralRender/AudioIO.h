@@ -31,6 +31,14 @@ struct AudioSource
 	vec3f pos = vec3f(0, 0, 0);
 };
 
+struct StrCompare : public std::binary_function<const char*, const char*, bool> {
+public:
+	bool operator() (const char* str1, const char* str2) const
+	{
+		return std::strcmp(str1, str2) < 0;
+	}
+};
+
 class AudioIO
 {
 public:
@@ -57,7 +65,7 @@ public:
 
 	/* Output filtered audio to a .wav file. Experimental.
 	*/
-	void OutputToWAV(const char* sourceID, const char* output);
+	void OutputToWAV(const char* sourceID, const char* output, vec3f pos);
 private:
 	/*Singleton modules.*/
 	AudioIO() {};
@@ -66,7 +74,7 @@ private:
 
 	/*FMOD modules.*/
 	System *system;
-	map<const char*, AudioSource*> audioSources;
+	map<const char*, AudioSource*, StrCompare> audioSources;
 	FMOD_RESULT result;
 	void ErrorHandle();
 

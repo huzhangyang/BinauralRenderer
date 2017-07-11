@@ -92,7 +92,7 @@ void AudioIO::AddAudioSource(const char * filename, const char* sourceID)
 
 void AudioIO::RemoveAudioSource(const char * sourceID)
 {
-	if (audioSources.count(sourceID) == 1)
+	if (audioSources.find(sourceID) != audioSources.end())
 	{
 		audioSources[sourceID]->sound->release();
 		audioSources[sourceID]->dsp->release();
@@ -102,7 +102,7 @@ void AudioIO::RemoveAudioSource(const char * sourceID)
 
 void AudioIO::PlayAudioSource(const char * sourceID)
 {
-	if (audioSources.count(sourceID) == 1)
+	if (audioSources.find(sourceID) != audioSources.end())
 	{
 		result = system->playSound(audioSources[sourceID]->sound, 0, false, &audioSources[sourceID]->channel);
 		ErrorHandle();
@@ -113,7 +113,7 @@ void AudioIO::PlayAudioSource(const char * sourceID)
 
 void AudioIO::StopAudioSource(const char * sourceID)
 {
-	if (audioSources.count(sourceID) == 1)
+	if (audioSources.find(sourceID) != audioSources.end())
 	{
 		audioSources[sourceID]->channel->stop();
 	}
@@ -121,7 +121,7 @@ void AudioIO::StopAudioSource(const char * sourceID)
 
 void AudioIO::ToggleAudioSourcePlaying(const char * sourceID)
 {
-	if (audioSources.count(sourceID) == 1)
+	if (audioSources.find(sourceID) != audioSources.end())
 	{
 		bool x;
 		result = audioSources[sourceID]->channel->isPlaying(&x);
@@ -132,7 +132,7 @@ void AudioIO::ToggleAudioSourcePlaying(const char * sourceID)
 bool AudioIO::IsAudioSourcePlaying(const char * sourceID)
 {
 	bool ret = false;
-	if (audioSources.count(sourceID) == 1)
+	if (audioSources.find(sourceID) != audioSources.end())
 	{
 		audioSources[sourceID]->channel->isPlaying(&ret);
 	}
@@ -141,7 +141,7 @@ bool AudioIO::IsAudioSourcePlaying(const char * sourceID)
 
 void AudioIO::SetAudioSourceHRTF(const char * sourceID, bool enable)
 {
-	if (audioSources.count(sourceID) == 1)
+	if (audioSources.find(sourceID) != audioSources.end())
 	{
 		audioSources[sourceID]->dsp->setBypass(!enable);
 	}
@@ -149,14 +149,13 @@ void AudioIO::SetAudioSourceHRTF(const char * sourceID, bool enable)
 
 void AudioIO::SetAudioSourcePos(const char * sourceID, vec3f pos)
 {
-
-	if (audioSources.count(sourceID) == 1)
+	if (audioSources.find(sourceID) != audioSources.end())
 	{
 		audioSources[sourceID]->pos = pos;
 	}
 }
 
-void AudioIO::OutputToWAV(const char * input, const char * output)
+void AudioIO::OutputToWAV(const char * input, const char * output, vec3f pos)
 {
 	System *systemNRT;
 	result = FMOD::System_Create(&systemNRT);
@@ -184,6 +183,7 @@ void AudioIO::OutputToWAV(const char * input, const char * output)
 	AudioSource* as = new AudioSource();
 	as->sound = sound;
 	as->dsp = dsp;
+	as->pos = pos;
 	dsp->setUserData(as);//pass audiosource to userdata so as to be accessed from the callback
 
 	printf("Outputing to %s, it might take a few minutes. Please wait.\n", output);

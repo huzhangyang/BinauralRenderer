@@ -228,7 +228,6 @@ void Renderer::Release()
 {
 	free(buffer);
 	free(signal);
-	free(filter);
 	free(result);
 	fftw_destroy_plan(plan_f);
 	fftw_destroy_plan(plan_i);
