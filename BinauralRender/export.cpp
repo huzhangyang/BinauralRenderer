@@ -106,15 +106,13 @@ extern "C"
 	}
 
 	/*
-	Set the hrtf file to be used in the renderer.
+	Set the hrir file to be used in the renderer.
 	filename: The path of original hrir file. CIPIC hrir format is supported.
 	*/
-	__declspec(dllexport) void SetHRTF(const char * filename)
+	__declspec(dllexport) void SetHRIR(const char * filename)
 	{
 		HRIRData *hrir = DataIO::OpenMat(filename);
-		HRTFData *hrtf = DataIO::ConvertToHRTF(hrir);
-		Renderer::Instance()->SetHRTF(hrtf);
-		delete(hrir);
+		Renderer::Instance()->SetHRIR(hrir);
 	}
 
 	/*

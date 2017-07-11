@@ -85,11 +85,5 @@ public:
 	@param hrir: the path of .mat file.
 	@return converted HRTF data. NULL if failed.
 	*/
-	static HRTFData* ConvertToHRTF(HRIRData* hrir);
-
-private:
-	/* Calculate the best HRTF length of power 2 according to the length of HRIR. 
-	e.g. HRTF length should be 256 in the case of HRIR length of 200.
-	*/
-	static int CalculateHRTFLength();
+	static HRTFData* ConvertToHRTF(HRIRData* hrir, int fftSize);
 };

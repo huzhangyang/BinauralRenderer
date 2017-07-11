@@ -83,15 +83,13 @@ HRIRData* DataIO::OpenMat(const char* filename)
 	return data;
 }
 
-HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
+HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir, int fftSize)
 {
 	HRTFData* data = new HRTFData();
-	int length = CalculateHRTFLength();
-	data->length = length;
 
 	//pre-measure
-	double* inout = (double*)malloc(sizeof(double) * length);
-	fftw_plan plan = fftw_plan_r2r_1d(length, inout, inout, FFTW_R2HC, FFTW_MEASURE);
+	double* inout = (double*)malloc(sizeof(double) * fftSize);
+	fftw_plan plan = fftw_plan_r2r_1d(fftSize, inout, inout, FFTW_R2HC, FFTW_MEASURE);
 	fftw_execute(plan);
 
 	//fft to hrtf
@@ -104,14 +102,14 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 			{
 				inout[k] = hrir->hrir_l[i][j][k];
 			}
-			for (int k = HRIR_LENGTH; k < length; k++)
+			for (int k = HRIR_LENGTH; k < fftSize; k++)
 			{
 				inout[k] = 0.0;
 			}
 			//left channel HRTF output
 			fftw_execute(plan);
-			data->hrtf_l[i][j].resize(length);
-			for (int k = 0; k < length; k++)
+			data->hrtf_l[i][j].resize(fftSize);
+			for (int k = 0; k < fftSize; k++)
 			{
 				data->hrtf_l[i][j][k] = inout[k];
 			}
@@ -120,14 +118,14 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 			{
 				inout[k] = hrir->hrir_r[i][j][k];
 			}
-			for (int k = HRIR_LENGTH; k < length; k++)
+			for (int k = HRIR_LENGTH; k < fftSize; k++)
 			{
 				inout[k] = 0.0;
 			}
 			//right channel HRTF output
 			fftw_execute(plan);
-			data->hrtf_r[i][j].resize(length);
-			for (int k = 0; k < length; k++)
+			data->hrtf_r[i][j].resize(fftSize);
+			for (int k = 0; k < fftSize; k++)
 			{
 				data->hrtf_r[i][j][k] = inout[k];
 			}
@@ -136,16 +134,9 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir)
 
 	fftw_destroy_plan(plan);
 	free(inout);
+	delete(hrir);
 
 	return data;
-}
-
-int DataIO::CalculateHRTFLength()
-{
-	int length = 2;
-	while (length < HRIR_LENGTH)
-		length *= 2;
-	return length;
 }
 
 HRTFData::HRTFData()

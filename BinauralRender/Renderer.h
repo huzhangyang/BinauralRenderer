@@ -41,6 +41,8 @@ struct vec3
 };
 typedef vec3<float> vec3f;
 
+enum ConvolutionMethod{Frequency = 1024, OverlapAdd = 256, OverlapSave = 512};
+
 class Renderer
 {
 public:
@@ -51,8 +53,8 @@ public:
 	*/
 	void Release();
 
-	/*Set the HRTF to render.*/
-	void SetHRTF(HRTFData* data);
+	/*Set the HRIR to render.*/
+	void SetHRIR(HRIRData* data);
 
 	/*Main render function.*/
 	void Render(vector<double>& left, vector<double>& right, vec3f pos);
@@ -61,7 +63,7 @@ public:
 	void SetListener(vec3f pos, vec3f ori);
 private:
 	/*Singleton modules.*/
-	Renderer() {};
+	Renderer() { method = OverlapAdd; };
 	static Renderer* instance;
 
 	/*Private functions.*/
@@ -78,6 +80,7 @@ private:
 	HRTFData* hrtf;
 
 	/*Used in convolution.*/
+	ConvolutionMethod method;
 	int fftSize;
 	double* buffer;
 	double* signal;

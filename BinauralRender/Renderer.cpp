@@ -11,10 +11,10 @@ Renderer* Renderer::Instance()
 	return instance;
 }
 
-void Renderer::SetHRTF(HRTFData * data)
+void Renderer::SetHRIR(HRIRData* data)
 {
-	hrtf = data;
-	fftSize = hrtf->length;
+	fftSize = (int)method;
+	hrtf = DataIO::ConvertToHRTF(data, fftSize);
 
 	free(buffer);
 	free(signal);
@@ -41,8 +41,21 @@ void Renderer::Render(vector<double>& left, vector<double>& right, vec3f pos)
 	GetAzimuthAndElevation(pos);
 	vector<double> leftHRTF, rightHRTF;
 	hrtf->GetHRTF(azimuth, elevation, leftHRTF, rightHRTF);
-	left = Convolve2(left, leftHRTF);
-	right = Convolve2(right, rightHRTF);
+	if (method == Frequency)
+	{
+		left = Convolve(left, leftHRTF);
+		right = Convolve(right, rightHRTF);
+	}
+	else if (method == OverlapAdd)
+	{
+		left = Convolve2(left, leftHRTF);
+		right = Convolve2(right, rightHRTF);
+	}
+	else if (method == OverlapSave)
+	{
+		left = Convolve3(left, leftHRTF);
+		right = Convolve3(right, rightHRTF);
+	}
 }
 
 void Renderer::SetListener(vec3f pos, vec3f ori)
@@ -110,7 +123,7 @@ vector<double> Renderer::Convolve(vector<double> _signal, vector<double> _filter
 	//IFFT
 	fftw_execute(plan_i);
 	//OUTPUT
-	output.resize(_signal.size());
+	output.resize(signalSize);
 	for (int i = 0; i < output.size(); i++)
 	{
 		output[i] = result[HRIR_LENGTH / 2 + i] / fftSize;
