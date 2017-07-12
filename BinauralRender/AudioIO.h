@@ -58,7 +58,7 @@ public:
 	void RemoveAudioSource(const char* sourceID);
 	void PlayAudioSource(const char* sourceID);
 	void StopAudioSource(const char* sourceID);
-	void ToggleAudioSourcePlaying(const char* sourceID);
+	void SetAudioSourcePaused(const char* sourceID, bool paused);
 	bool IsAudioSourcePlaying(const char* sourceID);
 	void SetAudioSourceHRTF(const char* sourceID, bool enable);
 	void SetAudioSourcePos(const char* sourceID, vec3f pos);

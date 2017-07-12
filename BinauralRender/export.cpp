@@ -2,7 +2,7 @@
 /*******************************************************************
 * Author: Zhangyang Hu
 * Date: 2017-07-01
-* Description: Used to export needed functions to be called in c#(e.g. Unity) or other c++ module (e.g. Unreal Engine).
+* Description: Used to export needed functions to be called in c# (e.g. Unity) or other c++ module (e.g. Unreal Engine).
 *******************************************************************/
 
 #include "AudioIO.h"
@@ -50,12 +50,13 @@ extern "C"
 	}
 
 	/*
-	Toggle the pause or resume of an audio source.
+	Set the pause or resume of an audio source.
 	sourceID: An custom ID used to uniquely identify the source object.
+	paused: if the audio source is to be paused.
 	*/
-	__declspec(dllexport) void ToggleAudioSourcePlaying(const char* sourceID)
+	__declspec(dllexport) void SetAudioSourcePaused(const char* sourceID, bool paused)
 	{
-		AudioIO::Instance()->ToggleAudioSourcePlaying(sourceID);
+		AudioIO::Instance()->SetAudioSourcePaused(sourceID, paused);
 	}
 
 	/*

@@ -119,13 +119,11 @@ void AudioIO::StopAudioSource(const char * sourceID)
 	}
 }
 
-void AudioIO::ToggleAudioSourcePlaying(const char * sourceID)
+void AudioIO::SetAudioSourcePaused(const char* sourceID, bool paused)
 {
 	if (audioSources.find(sourceID) != audioSources.end())
 	{
-		bool x;
-		result = audioSources[sourceID]->channel->isPlaying(&x);
-		audioSources[sourceID]->channel->setPaused(!x);
+		audioSources[sourceID]->channel->setPaused(paused);
 	}
 }
 
