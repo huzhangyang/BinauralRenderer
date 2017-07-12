@@ -66,30 +66,37 @@ void Renderer::SetListener(vec3f pos, vec3f ori)
 
 void Renderer::GetAzimuthAndElevation(vec3f sourcePos)
 {
-	//azimuth = arctan(y / x)
+	//azimuth = arctan(x / z)
 	float deltaX = sourcePos.x - listenerPos.x;
 	float deltaY = sourcePos.y - listenerPos.y;
 	float deltaZ = sourcePos.z - listenerPos.z;
-	if (deltaX == 0 && deltaY == 0)
+	if (deltaX == 0 && deltaZ == 0)
 		azimuth = 0;
 	else
-		azimuth = atan2(deltaY, deltaX) * 180 / PI;
-	//elevation = 90 - arccos(z / r)
+		azimuth = atan2(deltaX, deltaZ) * 180 / PI;
+	//elevation = 90 - arccos(y / r)
 	float r = pow(deltaX, 2.0f) + pow(deltaY, 2.0f) + pow(deltaZ, 2.0f);
 	r = sqrt(r);
 	if (r == 0)
 		elevation = 0;
 	else
-		elevation = 90 - acos(deltaZ / r) * 180 / PI;
+		elevation = 90 - acos(deltaY / r) * 180 / PI;
+	//calculate rotation
+	if (listenerOri.x > 180)
+		listenerOri.x = listenerOri.x - 360;
+	if (listenerOri.y > 180)
+		listenerOri.y = listenerOri.y - 360;
+	azimuth -= listenerOri.y;
+	elevation += listenerOri.x;
 	//cast azimuth to -90~90 and elevation to -90~270
 	if (azimuth > 90)
 	{
-		azimuth = 180 - azimuth;
+		azimuth = azimuth < 270 ? 180 - azimuth : azimuth - 360;
 		elevation = elevation < 0 ? 180 + elevation : 180 - elevation;
 	}
 	else if (azimuth < -90)
 	{
-		azimuth = -180 - azimuth;
+		azimuth = azimuth > -270 ? -180 - azimuth : azimuth + 360;
 		elevation = elevation < 0 ? 180 + elevation : 180 - elevation;
 	}
 	//printf("azimuth: %f, elevation: %f\n", azimuth, elevation);

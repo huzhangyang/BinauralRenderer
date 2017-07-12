@@ -17,7 +17,9 @@ const float PI = 3.14159265358979f;
 
 using namespace std;
 
-// Template for a simple vec3 container
+/* Template for a simple vec3 container.
+The engine uses a left handed coordinate system by default(+X = right, +Y = up, +Z = forwards).
+*/
 template <typename T>
 struct vec3
 {
