@@ -31,14 +31,6 @@ struct AudioSource
 	vec3f pos = vec3f(0, 0, 0);
 };
 
-struct StrCompare : public std::binary_function<const char*, const char*, bool> {
-public:
-	bool operator() (const char* str1, const char* str2) const
-	{
-		return std::strcmp(str1, str2) < 0;
-	}
-};
-
 class AudioIO
 {
 public:
@@ -74,7 +66,7 @@ private:
 
 	/*FMOD modules.*/
 	System *system;
-	map<const char*, AudioSource*, StrCompare> audioSources;
+	map<string, AudioSource*> audioSources;
 	FMOD_RESULT result;
 	void ErrorHandle();
 
