@@ -43,19 +43,10 @@ public:
 	/* Get HRTF data.
 	@param azimuth: azimuth angle in degree. [-90, 90]
 	@param elevation: elevation angle in degree. [-90, 270]
-	@param nearest: if no specific hrtf data found given azimuth and elevation, use hrtf of nearest location.
+	@param interpolation: if yes interpolate hrir using triangulation method, otherwise use hrtf of nearest location.
 	@return HRTF data in pointer left & right.
 	*/
-	void GetHRTF(float azimuth, float elevation, vector<double>& left, vector<double>& right ,bool nearest = true);
-
-	/* Get HRTF data.
-	@param azimuth: azimuth angle in degree. [-90, 90]
-	@param elevation: elevation angle in degree. [-90, 270]
-	@param nearest: if no specific hrtf data found given azimuth and elevation, use hrtf of nearest location.
-	@return corresponding HRTF data.
-	*/
-	vector<double> GetLeftHRTF(float azimuth, float elevation, bool nearest = true);
-	vector<double> GetRightHRTF(float azimuth, float elevation, bool nearest = true);
+	void GetHRTF(float azimuth, float elevation, vector<double>& left, vector<double>& right ,bool interpolation = false);
 private:
 	float azimuths[AZIMUTH_COUNT];
 	float elevations[ELEVATION_COUNT];

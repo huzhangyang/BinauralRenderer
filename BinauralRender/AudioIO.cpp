@@ -17,6 +17,9 @@ void AudioIO::Init()
 	result = System_Create(&system);
 	ErrorHandle();
 
+	result = system->setDSPBufferSize(DECODE_BUFFER_SIZE, 4);
+	ErrorHandle();
+
 	result = system->init(512, FMOD_INIT_NORMAL, 0);
 	ErrorHandle();	
 }

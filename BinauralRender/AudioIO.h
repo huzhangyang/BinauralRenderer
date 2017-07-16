@@ -21,7 +21,7 @@ using namespace std;
 using namespace FMOD;
 
 /*num of samples per channel to read for each update.*/
-const int DECODE_BUFFER_SIZE = 1024;//FMOD use 1024 by default so no need to explicit set
+const int DECODE_BUFFER_SIZE = 2048;
 
 struct AudioSource
 {

@@ -154,48 +154,21 @@ HRTFData::HRTFData()
 		elevations[i] = -45 + 5.625f * i;
 }
 
-void HRTFData::GetHRTF(float azimuth, float elevation, vector<double>& left, vector<double>& right, bool nearest)
+void HRTFData::GetHRTF(float azimuth, float elevation, vector<double>& left, vector<double>& right, bool interpolation)
 {
-	int azimuthIndex = GetAzimuthIndex(azimuth, nearest);
-	int elevationIndex = GetElevationIndex(elevation, nearest);
-	if (azimuthIndex >= 0 && elevationIndex >= 0)
+	if (interpolation)
 	{
-		left = hrtf_l[azimuthIndex][elevationIndex];
-		right = hrtf_r[azimuthIndex][elevationIndex];
-	}
-	else
-	{
-		printf("GetHRTF Failed at %f %f.\n", azimuth, elevation);
-	}
-}
 
-vector<double> HRTFData::GetLeftHRTF(float azimuth, float elevation, bool nearest)
-{
-	int azimuthIndex = GetAzimuthIndex(azimuth, nearest);
-	int elevationIndex = GetElevationIndex(elevation, nearest);
-	if (azimuthIndex >= 0 && elevationIndex >= 0)
-	{
-		return hrtf_l[azimuthIndex][elevationIndex];
 	}
 	else
 	{
-		printf("GetLeftHRTF Failed at %f %f.\n", azimuth, elevation);
-		return vector<double>();
-	}
-}
-
-vector<double> HRTFData::GetRightHRTF(float azimuth, float elevation, bool nearest)
-{
-	int azimuthIndex = GetAzimuthIndex(azimuth, nearest);
-	int elevationIndex = GetElevationIndex(elevation, nearest);
-	if (azimuthIndex >= 0 && elevationIndex >= 0)
-	{
-		return hrtf_r[azimuthIndex][elevationIndex];
-	}
-	else
-	{
-		printf("GetRightHRTF Failed at %f %f.\n", azimuth, elevation);
-		return vector<double>();
+		int azimuthIndex = GetAzimuthIndex(azimuth, true);
+		int elevationIndex = GetElevationIndex(elevation, true);
+		if (azimuthIndex >= 0 && elevationIndex >= 0)
+		{
+			left = hrtf_l[azimuthIndex][elevationIndex];
+			right = hrtf_r[azimuthIndex][elevationIndex];
+		}
 	}
 }
 
@@ -206,7 +179,7 @@ int HRTFData::GetAzimuthIndex(float azimuth, bool nearest)
 	int azimuthIndex = -1;
 	float minAzimuthError = 180;
 
-	for (int i = 0; i < 25; i++)
+	for (int i = 0; i < AZIMUTH_COUNT; i++)
 	{
 		float azimuthError = abs(azimuth - azimuths[i]);
 		if (azimuthError < minAzimuthError)
@@ -229,7 +202,7 @@ int HRTFData::GetElevationIndex(float elevation, bool nearest)
 	int elevationIndex = -1;
 	float minElevationIndex = 360;
 
-	for (int i = 0; i < 25; i++)
+	for (int i = 0; i < ELEVATION_COUNT; i++)
 	{
 		float elevationError = abs(elevation - elevations[i]);
 		if (elevationError < minElevationIndex)
