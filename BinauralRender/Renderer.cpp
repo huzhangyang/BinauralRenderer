@@ -41,21 +41,55 @@ void Renderer::Render(vector<double>& left, vector<double>& right, vec3f pos)
 	GetAzimuthAndElevation(pos);
 	vector<double> leftHRTF, rightHRTF;
 	hrtf->GetHRTF(azimuth, elevation, leftHRTF, rightHRTF);
-	if (method == Frequency)
+
+	vector<double> retLeft, retRight;
+	if (method == Direct)
 	{
-		left = Convolve(left, leftHRTF);
-		right = Convolve(right, rightHRTF);
+		retLeft = Convolve(left, leftHRTF);
+		retRight = Convolve(right, rightHRTF);
 	}
 	else if (method == OverlapAdd)
 	{
-		left = Convolve2(left, leftHRTF);
-		right = Convolve2(right, rightHRTF);
+		retLeft = Convolve2(left, leftHRTF);
+		retRight = Convolve2(right, rightHRTF);
 	}
 	else if (method == OverlapSave)
 	{
-		left = Convolve3(left, leftHRTF);
-		right = Convolve3(right, rightHRTF);
+		retLeft = Convolve3(left, leftHRTF);
+		retRight = Convolve3(right, rightHRTF);
 	}
+	/*
+	if (lastLeftHRTF.size() > 0 && lastRightHRTF.size() > 0)
+	{
+		vector<double> lastLeft, lastRight;
+		if (method == Direct)
+		{
+			lastLeft = Convolve(left, lastLeftHRTF);
+			lastRight = Convolve(right, lastRightHRTF);
+		}
+		else if (method == OverlapAdd)
+		{
+			lastLeft = Convolve2(left, lastLeftHRTF);
+			lastRight = Convolve2(right, lastRightHRTF);
+		}
+		else if (method == OverlapSave)
+		{
+			lastLeft = Convolve3(left, lastLeftHRTF);
+			lastRight = Convolve3(right, lastRightHRTF);
+		}
+		//cosine shaped crossfade
+		size_t size = left.size();
+		for (int i = 0; i < size; i++)
+		{
+			double crossfadeRatio = cos(i / (double)size * PI / 2);
+			retLeft[i] = crossfadeRatio * lastLeft[i] + (1 - crossfadeRatio) * retLeft[i];
+			retRight[i] = crossfadeRatio * lastRight[i] + (1 - crossfadeRatio) * retRight[i];
+		}
+	}
+	lastLeftHRTF = leftHRTF;
+	lastRightHRTF = rightHRTF;*/
+	left = retLeft;
+	right = retRight;
 }
 
 void Renderer::SetListener(vec3f pos, vec3f ori)
