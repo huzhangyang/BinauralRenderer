@@ -88,6 +88,13 @@ void Renderer::Render(vector<double>& left, vector<double>& right, vec3f pos)
 	}
 	lastLeftHRTF = leftHRTF;
 	lastRightHRTF = rightHRTF;*/
+	float attenuation = GetDistanceAttenuation(pos.dis(listenerPos));
+	size_t size = left.size();
+	for (int i = 0; i < size; i++)
+	{
+		retLeft[i] *= attenuation;
+		retRight[i] *= attenuation;
+	}
 	left = retLeft;
 	right = retRight;
 }
@@ -109,8 +116,7 @@ void Renderer::GetAzimuthAndElevation(vec3f sourcePos)
 	else
 		azimuth = atan2(deltaX, deltaZ) * 180 / PI;
 	//elevation = 90 - arccos(y / r)
-	float r = pow(deltaX, 2.0f) + pow(deltaY, 2.0f) + pow(deltaZ, 2.0f);
-	r = sqrt(r);
+	float r = sourcePos.dis(listenerPos);
 	if (r == 0)
 		elevation = 0;
 	else
@@ -134,6 +140,18 @@ void Renderer::GetAzimuthAndElevation(vec3f sourcePos)
 		elevation = elevation < 0 ? 180 + elevation : 180 - elevation;
 	}
 	//printf("azimuth: %f, elevation: %f\n", azimuth, elevation);
+}
+
+float Renderer::GetDistanceAttenuation(float distance, float minDistance, float maxDistance)
+{
+	if (distance <= minDistance)
+		return 1.0f;
+
+	if (distance > maxDistance)
+		return 0.0f;
+
+	float attnuation = pow(10.0f, -(distance - minDistance) / (maxDistance - minDistance));
+	return attnuation;
 }
 
 vector<double> Renderer::Convolve(vector<double> _signal, vector<double> _filter)

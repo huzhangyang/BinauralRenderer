@@ -40,6 +40,15 @@ struct vec3
 	}
 
 	vec3() {}
+
+	T dis(vec3 t2)
+	{
+		T deltaX = this->x - t2.x;
+		T deltaY = this->y - t2.y;
+		T deltaZ = this->z - t2.z;
+		T rr = pow(deltaX, 2.0f) + pow(deltaY, 2.0f) + pow(deltaZ, 2.0f);
+		return sqrt(rr);
+	}
 };
 typedef vec3<float> vec3f;
 
@@ -70,6 +79,7 @@ private:
 
 	/*Private functions.*/
 	void GetAzimuthAndElevation(vec3f sourcePos);
+	float GetDistanceAttenuation(float distance, float minDistance = 1, float maxDistance = 50);//unit: meter
 	vector<double> Convolve(vector<double> _signal, vector<double> _filter);//direct frequency multiplication. fftSize = 2048
 	vector<double> Convolve2(vector<double> _signal, vector<double> _filter);//overlap add. fftSize = 256
 	vector<double> Convolve3(vector<double> _signal, vector<double> _filter);//overlap save. fftSize = 512
