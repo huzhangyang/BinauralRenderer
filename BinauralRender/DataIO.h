@@ -34,6 +34,7 @@ class HRTFData
 public:
 	vector<double> hrtf_l[AZIMUTH_COUNT][ELEVATION_COUNT];
 	vector<double> hrtf_r[AZIMUTH_COUNT][ELEVATION_COUNT];
+	vector<double> dirac;
 
 	HRTFData();
 
@@ -43,11 +44,12 @@ public:
 	/* Get HRTF data.
 	@param azimuth: azimuth angle in degree. [-90, 90]
 	@param elevation: elevation angle in degree. [-90, 270]
-	@param distance: distance between audio source and listener.
+	@param distance: distance between audio source and listener. used for dirac interpolation on near field.
+	@param minDistance: distance starting interpolation. used for dirac interpolation on near field.
 	@param interpolation: if yes interpolate hrir using triangulation method, otherwise use hrtf of nearest location.
 	@return HRTF data in pointer left & right.
 	*/
-	void GetHRTF(float azimuth, float elevation, float distance, vector<double>& left, vector<double>& right ,bool interpolation = false);
+	void GetHRTF(float azimuth, float elevation, float distance, float minDistance, vector<double>& left, vector<double>& right ,bool interpolation = false);
 private:
 	float azimuths[AZIMUTH_COUNT];
 	float elevations[ELEVATION_COUNT];
@@ -60,7 +62,6 @@ private:
 	*/
 	int GetAzimuthIndex(float azimuth, bool nearest);
 	int GetElevationIndex(float elevation, bool nearest);
-
 };
 
 class DataIO

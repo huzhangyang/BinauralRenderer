@@ -40,7 +40,7 @@ void Renderer::Render(vector<double>& left, vector<double>& right, vec3f pos)
 
 	GetAzimuthAndElevation(pos);
 	vector<double> leftHRTF, rightHRTF;
-	hrtf->GetHRTF(azimuth, elevation, distance, leftHRTF, rightHRTF);
+	hrtf->GetHRTF(azimuth, elevation, distance, (float)MIN_DISTANCE, leftHRTF, rightHRTF);
 
 	vector<double> retLeft, retRight;
 	if (method == Direct)
@@ -142,15 +142,15 @@ void Renderer::GetAzimuthAndElevation(vec3f sourcePos)
 	//printf("azimuth: %f, elevation: %f\n", azimuth, elevation);
 }
 
-float Renderer::GetDistanceAttenuation(float distance, float minDistance, float maxDistance)
+float Renderer::GetDistanceAttenuation(float distance)
 {
-	if (distance <= minDistance)
+	if (distance <= MIN_DISTANCE)
 		return 1.0f;
 
-	if (distance > maxDistance)
+	if (distance > MAX_DISTANCE)
 		return 0.0f;
 
-	float attnuation = pow(10.0f, -(distance - minDistance) / (maxDistance - minDistance));
+	float attnuation = pow(10.0f, -(distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE));
 	return attnuation;
 }
 

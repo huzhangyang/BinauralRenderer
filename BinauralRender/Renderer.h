@@ -14,6 +14,8 @@
 #include "DataIO.h"
 
 const float PI = 3.14159265358979f;
+const int MIN_DISTANCE = 3;
+const int MAX_DISTANCE = 50;
 
 using namespace std;
 
@@ -79,7 +81,7 @@ private:
 
 	/*Private functions.*/
 	void GetAzimuthAndElevation(vec3f sourcePos);
-	float GetDistanceAttenuation(float distance, float minDistance = 1, float maxDistance = 50);//unit: meter
+	float GetDistanceAttenuation(float distance);//unit: meter
 	vector<double> Convolve(vector<double> _signal, vector<double> _filter);//direct frequency multiplication. fftSize = 2048
 	vector<double> Convolve2(vector<double> _signal, vector<double> _filter);//overlap add. fftSize = 256
 	vector<double> Convolve3(vector<double> _signal, vector<double> _filter);//overlap save. fftSize = 512

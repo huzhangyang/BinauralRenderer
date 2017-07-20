@@ -132,6 +132,31 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir, int fftSize)
 		}
 	}
 
+	//prepare Dirac filter
+	for (int k = 0; k < fftSize; k++)
+	{
+		inout[k] = 0.0;
+	}
+
+	double max = 0;
+	int maxIndex = 0;
+	for (int k = 0; k < HRIR_LENGTH; k++)
+	{
+		if (abs(hrir->hrir_l[0][0][k]) > max)
+		{
+			max = abs(hrir->hrir_l[0][0][k]);
+			maxIndex = k;
+		}
+	}
+	inout[maxIndex + 1] = 1.0;
+
+	fftw_execute(plan);
+	data->dirac.resize(fftSize);
+	for (int k = 0; k < fftSize; k++)
+	{
+		data->dirac[k] = inout[k];
+	}
+
 	fftw_destroy_plan(plan);
 	free(inout);
 	delete(hrir);
@@ -154,7 +179,7 @@ HRTFData::HRTFData()
 		elevations[i] = -45 + 5.625f * i;
 }
 
-void HRTFData::GetHRTF(float azimuth, float elevation, float distance, vector<double>& left, vector<double>& right, bool interpolation)
+void HRTFData::GetHRTF(float azimuth, float elevation, float distance, float minDistance, vector<double>& left, vector<double>& right, bool interpolation)
 {
 	if (interpolation)
 	{
@@ -168,6 +193,17 @@ void HRTFData::GetHRTF(float azimuth, float elevation, float distance, vector<do
 		{
 			left = hrtf_l[azimuthIndex][elevationIndex];
 			right = hrtf_r[azimuthIndex][elevationIndex];
+		}
+	}
+
+	if (distance < minDistance)
+	{
+		//interpolate with Dirac Filter
+		int size = (int)left.size();
+		for (int i = 0; i < size; i++)
+		{
+			left[i] = (distance / minDistance) * left[i] + (1 - distance / minDistance) * dirac[i];
+			right[i] = (distance / minDistance) * right[i] + (1 - distance / minDistance) * dirac[i];
 		}
 	}
 }
