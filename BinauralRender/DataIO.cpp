@@ -154,7 +154,7 @@ HRTFData::HRTFData()
 		elevations[i] = -45 + 5.625f * i;
 }
 
-void HRTFData::GetHRTF(float azimuth, float elevation, vector<double>& left, vector<double>& right, bool interpolation)
+void HRTFData::GetHRTF(float azimuth, float elevation, float distance, vector<double>& left, vector<double>& right, bool interpolation)
 {
 	if (interpolation)
 	{

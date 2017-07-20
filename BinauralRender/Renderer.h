@@ -88,7 +88,7 @@ private:
 	vec3f listenerPos;
 	vec3f listenerOri;
 	map<const char*, vec3f> sourcePos;
-	float azimuth, elevation;
+	float azimuth, elevation, distance;
 	HRTFData* hrtf;
 
 	/*Used in convolution.*/

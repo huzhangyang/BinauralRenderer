@@ -40,7 +40,7 @@ void Renderer::Render(vector<double>& left, vector<double>& right, vec3f pos)
 
 	GetAzimuthAndElevation(pos);
 	vector<double> leftHRTF, rightHRTF;
-	hrtf->GetHRTF(azimuth, elevation, leftHRTF, rightHRTF);
+	hrtf->GetHRTF(azimuth, elevation, distance, leftHRTF, rightHRTF);
 
 	vector<double> retLeft, retRight;
 	if (method == Direct)
@@ -88,7 +88,7 @@ void Renderer::Render(vector<double>& left, vector<double>& right, vec3f pos)
 	}
 	lastLeftHRTF = leftHRTF;
 	lastRightHRTF = rightHRTF;*/
-	float attenuation = GetDistanceAttenuation(pos.dis(listenerPos));
+	float attenuation = GetDistanceAttenuation(distance);
 	size_t size = left.size();
 	for (int i = 0; i < size; i++)
 	{
@@ -116,11 +116,11 @@ void Renderer::GetAzimuthAndElevation(vec3f sourcePos)
 	else
 		azimuth = atan2(deltaX, deltaZ) * 180 / PI;
 	//elevation = 90 - arccos(y / r)
-	float r = sourcePos.dis(listenerPos);
-	if (r == 0)
+	distance = sourcePos.dis(listenerPos);
+	if (distance == 0)
 		elevation = 0;
 	else
-		elevation = 90 - acos(deltaY / r) * 180 / PI;
+		elevation = 90 - acos(deltaY / distance) * 180 / PI;
 	//calculate rotation
 	if (listenerOri.x > 180)
 		listenerOri.x = listenerOri.x - 360;
