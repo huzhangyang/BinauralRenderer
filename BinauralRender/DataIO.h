@@ -49,7 +49,7 @@ public:
 	@param interpolation: if yes interpolate hrir using triangulation method, otherwise use hrtf of nearest location.
 	@return HRTF data in pointer left & right.
 	*/
-	void GetHRTF(float azimuth, float elevation, float distance, float minDistance, vector<double>& left, vector<double>& right ,bool interpolation = false);
+	void GetHRTF(float azimuth, float elevation, float distance, float minDistance, vector<double>& left, vector<double>& right ,bool interpolation = true);
 private:
 	float azimuths[AZIMUTH_COUNT];
 	float elevations[ELEVATION_COUNT];

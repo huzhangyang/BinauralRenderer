@@ -183,7 +183,68 @@ void HRTFData::GetHRTF(float azimuth, float elevation, float distance, float min
 {
 	if (interpolation)
 	{
+		int azimuthIndex1 = 0, azimuthIndex2 = AZIMUTH_COUNT - 1, elevationIndex1 = 0, elevationIndex2 = ELEVATION_COUNT - 1;
+		float azimuthRatio1 = 0, azimuthRatio2 = 0, elevationRatio1 = 0, elevationRatio2 = 0;
 
+		if (azimuth <= azimuths[0])
+		{
+			azimuthIndex1 = 0;
+			azimuthIndex2 = 0;
+			azimuthRatio1 = 0.5f;
+			azimuthRatio2 = 0.5f;
+		}
+		else if (azimuth >= azimuths[AZIMUTH_COUNT - 1])
+		{
+			azimuthIndex1 = AZIMUTH_COUNT - 1;
+			azimuthIndex2 = AZIMUTH_COUNT - 1;
+			azimuthRatio1 = 0.5f;
+			azimuthRatio2 = 0.5f;
+		}
+		else
+		{
+			for (int i = 0; i < AZIMUTH_COUNT; i++)
+			{
+				if (azimuths[i] >= azimuth)
+				{
+					azimuthIndex1 = i == 0 ? AZIMUTH_COUNT - 1 : i - 1;
+					azimuthIndex2 = i;
+					break;
+				}
+			}
+			azimuthRatio1 = abs(azimuth - azimuths[azimuthIndex1]) / abs(azimuths[azimuthIndex2] - azimuths[azimuthIndex1]);
+			azimuthRatio2 = 1 - azimuthRatio1;
+		}
+
+		for (int i = 0; i < ELEVATION_COUNT; i++)
+		{
+			if (elevations[i] >= elevation)
+			{
+				elevationIndex1 = i == 0 ? ELEVATION_COUNT - 1 : i - 1;
+				elevationIndex2 = i;
+				break;
+			}
+		}
+
+		auto e = elevation < 0 ? elevation + 360 : elevation;
+		auto e1 = elevations[elevationIndex1] < 0 ? elevations[elevationIndex1] + 360 : elevations[elevationIndex1];
+		auto e2 = elevations[elevationIndex2] < 0 ? elevations[elevationIndex2] + 360 : elevations[elevationIndex2];
+		elevationRatio1 = abs(e - e1) / abs(e2 - e1);
+		elevationRatio2 = 1 - elevationRatio1;
+
+		int size = (int)hrtf_l[0][0].size();
+		left = vector<double>(size);
+		right = vector<double>(size);
+		for (int i = 0; i < size; i++)
+		{
+			left[i] = hrtf_l[azimuthIndex1][elevationIndex1][i] * azimuthRatio1 * elevationRatio1
+				+ hrtf_l[azimuthIndex1][elevationIndex2][i] * azimuthRatio1 * elevationRatio2
+				+ hrtf_l[azimuthIndex2][elevationIndex1][i] * azimuthRatio2 * elevationRatio1
+				+ hrtf_l[azimuthIndex2][elevationIndex2][i] * azimuthRatio2 * elevationRatio2;
+			right[i] = hrtf_r[azimuthIndex1][elevationIndex1][i] * azimuthRatio1 * elevationRatio1
+				+ hrtf_r[azimuthIndex1][elevationIndex2][i] * azimuthRatio1 * elevationRatio2
+				+ hrtf_r[azimuthIndex2][elevationIndex1][i] * azimuthRatio2 * elevationRatio1
+				+ hrtf_r[azimuthIndex2][elevationIndex2][i] * azimuthRatio2 * elevationRatio2;
+		}
 	}
 	else
 	{
