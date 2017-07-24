@@ -1,5 +1,6 @@
 #include "DataIO.h"
 
+#if MATLAB
 HRIRData* DataIO::OpenMat(const char* filename)
 {
 	MATFile *mat = matOpen(filename, "r");
@@ -80,6 +81,59 @@ HRIRData* DataIO::OpenMat(const char* filename)
 	mxDestroyArray(matArray);
 	matClose(mat);
 
+	return data;
+}
+#endif
+
+HRIRData * DataIO::OpenBin(const char * filename)
+{
+	ifstream bin(filename, ios::in | ios::binary);
+	HRIRData *data = new HRIRData();
+
+	float v;
+
+	//dispose -90 azimuth
+	for (int j = 0; j < ELEVATION_COUNT + 2; j++)
+	{
+		for (int k = 0; k < HRIR_LENGTH; k++)
+		{
+			bin.read((char*)&v, sizeof(float));
+			bin.read((char*)&v, sizeof(float));
+		}
+	}
+
+	for (int i = 0; i < AZIMUTH_COUNT; i++)
+	{
+		//dispose -90 elevation
+		for (int k = 0; k < HRIR_LENGTH; k++)
+		{
+			bin.read((char*)&v, sizeof(float));
+			bin.read((char*)&v, sizeof(float));
+		}
+
+		for (int j = 0; j < ELEVATION_COUNT; j++)
+		{
+			for (int k = 0; k < HRIR_LENGTH; k++)
+			{
+				bin.read((char*)&v, sizeof(float));
+				data->hrir_l[i][j][k] = (double)v;
+			}
+			for (int k = 0; k < HRIR_LENGTH; k++)
+			{
+				bin.read((char*)&v, sizeof(float));
+				data->hrir_r[i][j][k] = (double)v;
+			}
+		}
+		//dispose 270 elevation
+		for (int k = 0; k < HRIR_LENGTH; k++)
+		{
+			bin.read((char*)&v, sizeof(float));
+			bin.read((char*)&v, sizeof(float));
+		}
+
+	}
+
+	bin.close();
 	return data;
 }
 

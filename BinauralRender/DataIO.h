@@ -6,10 +6,18 @@
 * Description: Load CIPIC HRIR data using MATLAB library.
 *******************************************************************/
 
-#include<cmath>
-#include<vector>
-#include "mat.h"
+#define MATLAB 0
+
+#include <cassert>
+#include <cmath>
+#include <fstream>
+#include <vector>
 #include "fftw3.h"
+
+#if MATLAB
+#include "mat.h"
+#endif
+
 
 const int AZIMUTH_COUNT = 25;
 const int ELEVATION_COUNT = 50;
@@ -67,12 +75,18 @@ private:
 class DataIO
 {
 public:
-
-	/* Open a .mat file and extract HRIR data.
+#if MATLAB
+	/* Open a MATLAB .mat file and extract HRIR data.
 	@param filename: the path of .mat file.
 	@return extracted HRIR data. NULL if failed.
 	*/
 	static HRIRData* OpenMat(const char* filename);
+#endif
+	/* Open a binary .bin file and extract HRIR data.
+	@param filename: the path of .bin file.
+	@return extracted HRIR data. NULL if failed.
+	*/
+	static HRIRData* OpenBin(const char* filename);
 
 	/* Convert HRIRs to HRTFs using fourier transform.
 	@param hrir: the path of .mat file.

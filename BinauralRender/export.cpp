@@ -16,7 +16,11 @@ auto id = "test";
 
 int main()
 {
+#if MATLAB
 	HRIRData *hrir = DataIO::OpenMat("c://test.mat");
+#else
+	HRIRData *hrir = DataIO::OpenBin("c://test.bin");
+#endif
 	Renderer::Instance()->SetHRIR(hrir);
 
 	//AudioIO::Instance()->OutputToWAV("c://test.mp3", "test.wav");
@@ -144,7 +148,11 @@ extern "C"
 	*/
 	__declspec(dllexport) void SetHRIR(const char * filename)
 	{
+#if MATLAB
 		HRIRData *hrir = DataIO::OpenMat(filename);
+#else
+		HRIRData *hrir = DataIO::OpenBin(filename);
+#endif
 		Renderer::Instance()->SetHRIR(hrir);
 	}
 
