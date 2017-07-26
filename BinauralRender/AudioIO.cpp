@@ -163,6 +163,8 @@ void AudioIO::OutputToWAV(const char * input, const char * output, vec3f pos)
 	ErrorHandle();
 	result = systemNRT->setOutput(FMOD_OUTPUTTYPE_WAVWRITER_NRT);
 	ErrorHandle();
+	result = systemNRT->setDSPBufferSize(DECODE_BUFFER_SIZE, 4);
+	ErrorHandle();
 	result = systemNRT->init(1, FMOD_INIT_STREAM_FROM_UPDATE, (void*)output);
 	ErrorHandle();
 
@@ -198,7 +200,7 @@ void AudioIO::OutputToWAV(const char * input, const char * output, vec3f pos)
 	{
 		as->channel->isPlaying(&playing);
 		as->channel->getPosition(&process, FMOD_TIMEUNIT_PCM);
-		printf("%d\n", process);
+		//printf("%d\n", process);
 		systemNRT->update();
 	}
 
