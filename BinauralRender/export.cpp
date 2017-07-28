@@ -23,7 +23,7 @@ int main()
 #endif
 	Renderer::Instance()->SetHRIR(hrir);
 
-	//AudioIO::Instance()->OutputToWAV("c://test.mp3", "test.wav");
+	AudioIO::Instance()->OutputToWAV("c://test.mp3", "test.wav", vec3f(0, 0, 0));
 
 	AudioIO::Instance()->AddAudioSource("c://test.mp3", id);
 	AudioIO::Instance()->PlayAudioSource(id);

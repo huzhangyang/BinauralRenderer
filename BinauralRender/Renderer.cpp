@@ -22,9 +22,11 @@ void Renderer::SetHRIR(HRIRData* data)
 	fftw_destroy_plan(plan_f);
 	fftw_destroy_plan(plan_i);
 
-	signal = (double*)malloc(sizeof(double) * fftSize);
-	buffer = (double*)malloc(sizeof(double) * fftSize / 2);
-	result = (double*)malloc(sizeof(double) * fftSize);
+
+
+	signal = fftw_alloc_real(fftSize);
+	buffer = fftw_alloc_real(fftSize / 2);
+	result = fftw_alloc_real(fftSize);
 	plan_f = fftw_plan_r2r_1d(fftSize, signal, signal, FFTW_R2HC, FFTW_MEASURE);
 	plan_i = fftw_plan_r2r_1d(fftSize, result, result, FFTW_HC2R, FFTW_MEASURE);
 	fftw_execute(plan_f);
@@ -185,9 +187,8 @@ vector<double> Renderer::Convolve(vector<double> _signal, vector<double> _filter
 	output.resize(signalSize);
 	for (int i = 0; i < output.size(); i++)
 	{
-		output[i] = result[HRIR_LENGTH / 2 + i] / fftSize;
+		output[i] = result[i] / fftSize;
 	}
-
 	return output;
 }
 
@@ -195,27 +196,27 @@ vector<double> Renderer::Convolve2(vector<double> _signal, vector<double> _filte
 {
 	int signalSize = (int)_signal.size();
 	int segmentNum = signalSize * 2 / fftSize;
-	int signalLength = fftSize / 2;
+	int fftSizeHalf = fftSize / 2;
 	output.resize(signalSize);
 	filter = &_filter[0];
 
 	int index = 0;
-	for (int i = 0; i < signalLength; i++)
+	for (int i = 0; i < fftSizeHalf; i++)
 		buffer[i] = 0;
 
 	for (int i = 0; i < segmentNum; i++)
 	{
 		//zero-tap signal
-		for (int j = 0; j < signalLength; j++)
+		for (int j = 0; j < fftSizeHalf; j++)
 			signal[j] = _signal[index++];
-		for (int j = signalLength; j < fftSize; j++)
+		for (int j = fftSizeHalf; j < fftSize; j++)
 			signal[j] = 0;
 		//fft signal
 		fftw_execute(plan_f);
 		//Multiply the FFTs		
 		result[0] = signal[0] * filter[0];
-		result[signalLength] = signal[signalLength] * filter[signalLength];
-		for (int j = 1; j < signalLength; j++)
+		result[fftSizeHalf] = signal[fftSizeHalf] * filter[fftSizeHalf];
+		for (int j = 1; j < fftSizeHalf; j++)
 		{
 			int k = fftSize - j;
 			result[j] = signal[j] * filter[j] - signal[k] * filter[k];
@@ -224,13 +225,13 @@ vector<double> Renderer::Convolve2(vector<double> _signal, vector<double> _filte
 		//ifft
 		fftw_execute(plan_i);
 		//overlap-add
-		for (int j = 0; j < signalLength; j++)
+		for (int j = 0; j < fftSizeHalf; j++)
 		{
-			output[i * signalLength + j] = buffer[j] + result[j] / fftSize;
+			output[i * fftSizeHalf + j] = buffer[j] + result[j] / fftSize;
 		}
-		for (int j = signalLength; j < fftSize; j++)
+		for (int j = fftSizeHalf; j < fftSize; j++)
 		{
-			buffer[j - signalLength] = result[j] / fftSize;
+			buffer[j - fftSizeHalf] = result[j] / fftSize;
 		}
 	}
 
@@ -247,7 +248,7 @@ vector<double> Renderer::Convolve3(vector<double> _signal, vector<double> _filte
 
 	int index = 0;
 
-	while (index + stepSize <= signalLength)
+	while (index <= signalLength)
 	{
 		//take signal
 		for (int i = 0; i < fftSize; i++)
@@ -285,9 +286,9 @@ vector<double> Renderer::Convolve3(vector<double> _signal, vector<double> _filte
 
 void Renderer::Release()
 {
-	free(buffer);
-	free(signal);
-	free(result);
+	fftw_free(buffer);
+	fftw_free(signal);
+	fftw_free(result);
 	fftw_destroy_plan(plan_f);
 	fftw_destroy_plan(plan_i);
 	output.clear();

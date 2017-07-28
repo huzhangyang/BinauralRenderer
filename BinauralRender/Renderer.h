@@ -54,7 +54,7 @@ struct vec3
 };
 typedef vec3<float> vec3f;
 
-enum ConvolutionMethod{Direct = 1024, OverlapAdd = 256, OverlapSave = 512};
+enum ConvolutionMethod{Direct = 1224, OverlapAdd = 256, OverlapSave = 512};
 
 class Renderer
 {
