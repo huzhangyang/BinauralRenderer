@@ -142,7 +142,7 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir, int fftSize)
 	HRTFData* data = new HRTFData();
 
 	//pre-measure
-	double* inout = (double*)malloc(sizeof(double) * fftSize);
+	double* inout = fftw_alloc_real(fftSize);
 	fftw_plan plan = fftw_plan_r2r_1d(fftSize, inout, inout, FFTW_R2HC, FFTW_MEASURE);
 	fftw_execute(plan);
 
@@ -212,7 +212,7 @@ HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir, int fftSize)
 	}
 
 	fftw_destroy_plan(plan);
-	free(inout);
+	fftw_free(inout);
 	delete(hrir);
 
 	return data;

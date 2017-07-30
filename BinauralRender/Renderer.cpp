@@ -152,8 +152,8 @@ float Renderer::GetDistanceAttenuation(float distance)
 	if (distance > MAX_DISTANCE)
 		return 0.0f;
 
-	float attnuation = pow(10.0f, -(distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE));
-	return attnuation;
+	float attenuation = pow(10.0f, -(distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE));
+	return attenuation;
 }
 
 vector<double> Renderer::Convolve(vector<double> _signal, vector<double> _filter)
