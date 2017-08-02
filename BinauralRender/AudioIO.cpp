@@ -107,9 +107,11 @@ void AudioIO::PlayAudioSource(const char * sourceID)
 {
 	if (audioSources.find(sourceID) != audioSources.end())
 	{
-		result = system->playSound(audioSources[sourceID]->sound, 0, false, &audioSources[sourceID]->channel);
+		result = system->playSound(audioSources[sourceID]->sound, 0, true, &audioSources[sourceID]->channel);
 		ErrorHandle();
 		result = audioSources[sourceID]->channel->addDSP(0, audioSources[sourceID]->dsp);
+		ErrorHandle();
+		result = audioSources[sourceID]->channel->setPaused(false);
 		ErrorHandle();
 	}
 }
@@ -191,8 +193,9 @@ void AudioIO::OutputToWAV(const char * input, const char * output, vec3f pos)
 
 	printf("Outputing to %s, it might take a few minutes. Please wait.\n", output);
 
-	result = systemNRT->playSound(as->sound, 0, false, &as->channel);
+	result = systemNRT->playSound(as->sound, 0, true, &as->channel);
 	result = as->channel->addDSP(0, as->dsp);
+	result = as->channel->setPaused(false);
 
 	bool playing = true;
 	unsigned int process;

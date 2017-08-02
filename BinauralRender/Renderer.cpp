@@ -253,8 +253,10 @@ vector<double> Renderer::Convolve3(vector<double> _signal, vector<double> _filte
 		//take signal
 		for (int i = 0; i < fftSize; i++)
 		{
-			if (index + i < signalLength)
-				signal[i] = _signal[index + i];
+			if(index + i < HRIR_LENGTH - 1)
+				signal[i] = 0;
+			else if (index + i < signalLength + HRIR_LENGTH - 1)
+				signal[i] = _signal[index + i - (HRIR_LENGTH - 1)];
 			else
 				signal[i] = 0;
 		}
