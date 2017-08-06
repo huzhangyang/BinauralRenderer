@@ -137,6 +137,68 @@ HRIRData * DataIO::OpenBin(const char * filename)
 	return data;
 }
 
+HRIRData * DataIO::OpenWav(const char * filename)
+{
+	ifstream wavfile(filename, ios::in | ios::binary);
+	HRIRData *data = new HRIRData();
+
+	unsigned short channel;// num of channel
+	unsigned long frequency;// sample rate
+	unsigned long bps;// bytes per second
+	unsigned short bitDepth;//bit depth
+	unsigned long dataSize;//data size	
+
+	wavfile.seekg(0x16);
+	wavfile.read((char*)&channel, sizeof(channel));
+
+	wavfile.seekg(0x18);
+	wavfile.read((char*)&frequency, sizeof(frequency));
+
+	wavfile.seekg(0x1c);
+	wavfile.read((char*)&bps, sizeof(bps));
+
+	wavfile.seekg(0x22);
+	wavfile.read((char*)&bitDepth, sizeof(bitDepth));
+
+	wavfile.seekg(0x28);
+	wavfile.read((char*)&dataSize, sizeof(dataSize));
+
+	int length = dataSize / channel / (bitDepth / 8);
+	wavfile.seekg(0x2c7);
+	unsigned char* pcmData = new unsigned char[dataSize];
+	wavfile.read((char*)pcmData, sizeof(char) * dataSize);
+
+	int dataIndex = 0;
+	int sampleAsInt = 0;
+
+	for (int j = 0; j < length; j++)
+	{
+		for (int i = 0; i < channel / 2; i++)
+		{
+			sampleAsInt = (pcmData[dataIndex + 2] << 16) | (pcmData[dataIndex + 1] << 8) | pcmData[dataIndex];
+
+			if (sampleAsInt & 0x800000)
+				sampleAsInt = sampleAsInt | ~0xFFFFFF;
+
+			data->hrir_l[i][0][j] = (double)sampleAsInt / 8388608.0;
+
+			dataIndex += 3;
+
+			sampleAsInt = (pcmData[dataIndex + 2] << 16) | (pcmData[dataIndex + 1] << 8) | pcmData[dataIndex];
+
+			if (sampleAsInt & 0x800000)
+				sampleAsInt = sampleAsInt | ~0xFFFFFF;
+
+			data->hrir_r[i][0][j] = (double)sampleAsInt / 8388608.0;
+
+			dataIndex += 3;
+		}
+	}
+
+	wavfile.close();
+	return data;
+}
+
 HRTFData* DataIO::ConvertToHRTF(HRIRData * hrir, int fftSize)
 {
 	HRTFData* data = new HRTFData();
@@ -229,7 +291,7 @@ HRTFData::HRTFData()
 	azimuths[23] = 65;
 	azimuths[24] = 80;
 
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < ELEVATION_COUNT; i++)
 		elevations[i] = -45 + 5.625f * i;
 }
 

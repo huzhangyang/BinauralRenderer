@@ -88,6 +88,12 @@ public:
 	*/
 	static HRIRData* OpenBin(const char* filename);
 
+	/* Open a wave .wav file and extract HRIR data.
+	@param filename: the path of .wav file.
+	@return extracted HRIR data. NULL if failed.
+	*/
+	static HRIRData* OpenWav(const char* filename);
+
 	/* Convert HRIRs to HRTFs using fourier transform.
 	@param hrir: the path of .mat file.
 	@return converted HRTF data. NULL if failed.
