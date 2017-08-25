@@ -46,9 +46,6 @@ public:
 
 	HRTFData();
 
-	/* The length of HRTF data.*/
-	int length;
-
 	/* Get HRTF data.
 	@param azimuth: azimuth angle in degree. [-90, 90]
 	@param elevation: elevation angle in degree. [-90, 270]

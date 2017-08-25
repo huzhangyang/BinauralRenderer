@@ -57,7 +57,7 @@ public:
 
 	/* Output filtered audio to a .wav file. Experimental.
 	*/
-	void OutputToWAV(const char* sourceID, const char* output, vec3f pos);
+	void OutputToWAV(const char* input, const char* output, vec3f pos);
 private:
 	/*Singleton modules.*/
 	AudioIO() {};

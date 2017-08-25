@@ -20,6 +20,9 @@ void AudioIO::Init()
 	result = system->setDSPBufferSize(DECODE_BUFFER_SIZE, 4);
 	ErrorHandle();
 
+	result = system->setSoftwareFormat(44100, FMOD_SPEAKERMODE_DEFAULT, 2);
+	ErrorHandle();
+
 	result = system->init(512, FMOD_INIT_NORMAL, 0);
 	ErrorHandle();	
 }
@@ -166,6 +169,8 @@ void AudioIO::OutputToWAV(const char * input, const char * output, vec3f pos)
 	result = systemNRT->setOutput(FMOD_OUTPUTTYPE_WAVWRITER_NRT);
 	ErrorHandle();
 	result = systemNRT->setDSPBufferSize(DECODE_BUFFER_SIZE, 4);
+	ErrorHandle();
+	result = systemNRT->setSoftwareFormat(44100, FMOD_SPEAKERMODE_DEFAULT, 2);
 	ErrorHandle();
 	result = systemNRT->init(1, FMOD_INIT_STREAM_FROM_UPDATE, (void*)output);
 	ErrorHandle();

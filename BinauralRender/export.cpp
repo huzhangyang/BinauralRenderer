@@ -9,7 +9,7 @@
 #include "DataIO.h"
 #include "Renderer.h"
 
-/*
+
 #include <windows.h>
 
 auto id = "test";
@@ -43,7 +43,7 @@ int main()
 
 	return 0;
 }
-*/
+
 
 extern "C"
 {

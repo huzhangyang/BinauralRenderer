@@ -22,8 +22,6 @@ void Renderer::SetHRIR(HRIRData* data)
 	fftw_destroy_plan(plan_f);
 	fftw_destroy_plan(plan_i);
 
-
-
 	signal = fftw_alloc_real(fftSize);
 	buffer = fftw_alloc_real(fftSize / 2);
 	result = fftw_alloc_real(fftSize);
