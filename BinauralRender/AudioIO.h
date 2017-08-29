@@ -58,6 +58,7 @@ public:
 	/* Output filtered audio to a .wav file. Experimental.
 	*/
 	void OutputToWAV(const char* input, const char* output, vec3f pos);
+	int GetLatency();
 private:
 	/*Singleton modules.*/
 	AudioIO() {};

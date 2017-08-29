@@ -216,7 +216,13 @@ void AudioIO::OutputToWAV(const char * input, const char * output, vec3f pos)
 	dsp->release();
 	systemNRT->close();
 	systemNRT->release();
-	printf("Outputing Complete.");
+	printf("Outputing Complete.\n");
+}
+
+int AudioIO::GetLatency()
+{
+	float ms = DECODE_BUFFER_SIZE * 1000.0f / 44100;
+	return ms * (4.0f - 1.5f);
 }
 
 void AudioIO::ErrorHandle()

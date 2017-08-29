@@ -54,7 +54,7 @@ struct vec3
 };
 typedef vec3<float> vec3f;
 
-enum ConvolutionMethod{Direct = 1224, OverlapAdd = 256, OverlapSave = 512};
+enum ConvolutionMethod{Direct = 1224, OverlapAdd = 512, OverlapSave = 1024};
 
 class Renderer
 {
@@ -82,9 +82,9 @@ private:
 	/*Private functions.*/
 	void GetAzimuthAndElevation(vec3f sourcePos);
 	float GetDistanceAttenuation(float distance);//unit: meter
-	vector<double> Convolve(vector<double> _signal, vector<double> _filter);//direct frequency multiplication. fftSize = 2048
-	vector<double> Convolve2(vector<double> _signal, vector<double> _filter);//overlap add. fftSize = 256
-	vector<double> Convolve3(vector<double> _signal, vector<double> _filter);//overlap save. fftSize = 512
+	vector<double> Convolve(vector<double> _signal, vector<double> _filter);//direct frequency multiplication.
+	vector<double> Convolve2(vector<double> _signal, vector<double> _filter);//overlap add.
+	vector<double> Convolve3(vector<double> _signal, vector<double> _filter);//overlap save.
 
 	/*Used for HRTF.*/
 	vec3f listenerPos;

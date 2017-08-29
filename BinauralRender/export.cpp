@@ -9,10 +9,11 @@
 #include "DataIO.h"
 #include "Renderer.h"
 
-
+#include <ctime>
 #include <windows.h>
 
 auto id = "test";
+auto pos = vec3f(1, 0, 1);
 
 int main()
 {
@@ -23,15 +24,24 @@ int main()
 #endif
 	Renderer::Instance()->SetHRIR(hrir);
 
-	AudioIO::Instance()->OutputToWAV("c://test.mp3", "test.wav", vec3f(0, 0, 0));
+	clock_t start, end;
 
-	AudioIO::Instance()->AddAudioSource("c://test.mp3", id);
+	start = clock();
+
+	AudioIO::Instance()->OutputToWAV("c://jobs.mp3", "test.wav", pos);
+
+	AudioIO::Instance()->AddAudioSource("c://jobs.mp3", id);
 	AudioIO::Instance()->PlayAudioSource(id);
+
+	end = clock();
+
+	printf("Time: %.3f\n", (double)(end - start) / CLOCKS_PER_SEC);
+	printf("Output Latency: %d ms\n", AudioIO::Instance()->GetLatency());
 
 	while (AudioIO::Instance()->IsAudioSourcePlaying(id))
 	{
 		Renderer::Instance()->SetListener(vec3f(0, 0, 0), vec3f(0, 0, 0));
-		AudioIO::Instance()->SetAudioSourcePos(id, vec3f(3, 3, 3));
+		AudioIO::Instance()->SetAudioSourcePos(id, pos);
 		AudioIO::Instance()->SetAudioSourceHRTF(id, true);
 
 		AudioIO::Instance()->Update();
